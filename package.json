@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/src/server.js",
     "doc": "ts-node src/openapi-doc.ts",
-    "test": "jest --config jest.config.cjs"
+    "test": "jest --config jest-conf.ts"
   },
   "keywords": [],
   "author": "Adrian NOYES",
