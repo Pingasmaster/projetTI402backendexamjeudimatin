@@ -53,8 +53,6 @@ Ensuite on peut naviguer vers http://localhost:`PORT`/docs pour voir la document
 ```
 stocklink-core/
 ├── init_db.sql            # Script SQL PostgreSQL
-├── scripts/
-│   └── generate-openapi.ts
 ├── src/
 │   ├── app.ts             # Configuration Express + middlewares
 │   ├── server.ts          # Point d’entrée serveur
@@ -66,7 +64,8 @@ stocklink-core/
 │   ├── schemas/           # Schémas Zod (validation)
 │   ├── services/          # Accès aux données / logique métier
 │   ├── utils/             # Helpers (JWT, async handler)
-│   └── swagger.ts         # Définition OpenAPI
+│   ├── swagger.ts         # Définition OpenAPI
+│   └── openapi-doc.ts # Script de génération OpenAPI
 ├── .env.example
 ├── package.json
 ├── reponses_sauvegarde.txt # Fichier réponse demandé

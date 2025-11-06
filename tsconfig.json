@@ -2,15 +2,9 @@
   "compilerOptions": {
     "target": "ES2024",
     "module": "commonjs",
-    "rootDir": ".",
     "outDir": "dist",
     "esModuleInterop": true,
-    "strict": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "types": ["node"]
+    "strict": true
   },
-  "include": ["src", "scripts", "jest-conf.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "scripts"]
 }
