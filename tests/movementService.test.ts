@@ -1,3 +1,4 @@
+// Ce fichier vérifie la logique métier autour des mouvements.
 import { AppError } from "../src/middlewares/errorHandler";
 import { MovementService } from "../src/services/movementService";
 
@@ -14,14 +15,14 @@ const poolQueryMock = postgresPool.query as jest.Mock;
 const connectMock = postgresPool.connect as jest.Mock;
 let service: MovementService;
 
-describe("movementService", () => {
+describe("Service movementService", () => {
   beforeEach(() => {
     poolQueryMock.mockReset();
     connectMock.mockReset();
     service = new MovementService(postgresPool as unknown as any);
   });
 
-  it("retrieves movements ordered by creation date", async () => {
+  it("récupère les mouvements par date décroissante", async () => {
     poolQueryMock.mockResolvedValue({
       rows: [
         {
@@ -42,7 +43,7 @@ describe("movementService", () => {
     );
   });
 
-  it("creates an inbound movement and updates stock", async () => {
+  it("crée un mouvement entrant et met à jour le stock", async () => {
     const clientQueryMock = jest.fn();
     const releaseMock = jest.fn();
     connectMock.mockResolvedValue({
@@ -86,7 +87,7 @@ describe("movementService", () => {
     expect(releaseMock).toHaveBeenCalled();
   });
 
-  it("rejects outbound movement when stock is insufficient", async () => {
+  it("refuse un mouvement sortant sans stock suffisant", async () => {
     const clientQueryMock = jest.fn();
     const releaseMock = jest.fn();
     connectMock.mockResolvedValue({
@@ -114,7 +115,7 @@ describe("movementService", () => {
     expect(releaseMock).toHaveBeenCalled();
   });
 
-  it("rejects movements for unknown products", async () => {
+  it("refuse un mouvement pour un produit inconnu", async () => {
     const clientQueryMock = jest.fn();
     const releaseMock = jest.fn();
     connectMock.mockResolvedValue({

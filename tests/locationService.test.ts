@@ -1,3 +1,4 @@
+// Ce fichier sécurise les règles de cartographie via des tests.
 import { AppError } from "../src/middlewares/errorHandler";
 import { LocationService } from "../src/services/locationService";
 
@@ -15,7 +16,7 @@ const collectionMock = {
 };
 let service: LocationService;
 
-describe("locationService", () => {
+describe("Service locationService", () => {
   beforeEach(() => {
     getMongoDbMock.mockReset();
     collectionMock.findOne.mockReset();
@@ -29,7 +30,7 @@ describe("locationService", () => {
     service = new LocationService(getMongoDb as unknown as any);
   });
 
-  it("fetches a warehouse configuration", async () => {
+  it("récupère une configuration d'entrepôt", async () => {
     collectionMock.findOne.mockResolvedValue({
       warehouse_id: 1,
       code: "WHS-001",
@@ -42,7 +43,7 @@ describe("locationService", () => {
     expect(collectionMock.findOne).toHaveBeenCalledWith({ warehouse_id: 1 });
   });
 
-  it("creates a new configuration when none exists", async () => {
+  it("crée une configuration lorsqu'il n'en existe pas", async () => {
     collectionMock.findOne
       .mockResolvedValueOnce(null)
       .mockResolvedValueOnce(undefined); // not used further
@@ -63,7 +64,7 @@ describe("locationService", () => {
     });
   });
 
-  it("rejects creation when configuration already exists", async () => {
+  it("refuse la création si la configuration existe déjà", async () => {
     collectionMock.findOne.mockResolvedValue({
       warehouse_id: 1,
       code: "WHS-001",
@@ -75,7 +76,7 @@ describe("locationService", () => {
     ).rejects.toThrow(AppError);
   });
 
-  it("updates an existing configuration", async () => {
+  it("met à jour une configuration existante", async () => {
     collectionMock.findOne
       .mockResolvedValueOnce({
         warehouse_id: 1,
@@ -103,7 +104,7 @@ describe("locationService", () => {
     );
   });
 
-  it("throws when updating a missing configuration", async () => {
+  it("lève une erreur quand la configuration est absente", async () => {
     collectionMock.findOne.mockResolvedValueOnce(null);
 
     await expect(
@@ -111,7 +112,7 @@ describe("locationService", () => {
     ).rejects.toThrow(AppError);
   });
 
-  it("checks if a bin exists", async () => {
+  it("vérifie l'existence d'un emplacement", async () => {
     collectionMock.findOne.mockResolvedValue({
       warehouse_id: 1,
       code: "WHS-001",

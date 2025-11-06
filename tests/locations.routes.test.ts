@@ -1,3 +1,4 @@
+// Ce fichier garantit que les routes de cartographie répondent correctement.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";
@@ -10,25 +11,17 @@ import { AppError } from "../src/middlewares/errorHandler";
 
 const authHeader = () =>
   `Bearer ${signToken({
-    sub: "admin",
-    email: process.env.ADMIN_EMAIL as string,
-    role: "admin",
+    sub: "1",
+    username: "tester",
+    role: "user",
   })}`;
 
-describe("Location routes", () => {
+describe("Routes de cartographie", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("rejects unauthenticated access to warehouse layout", async () => {
-    const getSpy = jest.spyOn(LocationService.prototype, "getWarehouseLocation");
-    const response = await request(app).get("/warehouses/1/locations");
-
-    expect(response.status).toBe(401);
-    expect(getSpy).not.toHaveBeenCalled();
-  });
-
-  it("returns warehouse layout when present", async () => {
+  it("renvoie la cartographie lorsque disponible", async () => {
     const getSpy = jest
       .spyOn(LocationService.prototype, "getWarehouseLocation")
       .mockResolvedValue(
@@ -40,38 +33,49 @@ describe("Location routes", () => {
         }),
       );
 
-    const response = await request(app)
-      .get("/warehouses/1/locations")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/warehouses/1/locations");
 
     expect(response.status).toBe(200);
     expect(response.body.code).toBe("WHS-001");
     expect(getSpy).toHaveBeenCalledWith(1);
   });
 
-  it("returns 404 when layout is missing", async () => {
+  it("renvoie 404 quand la cartographie manque", async () => {
     jest
       .spyOn(LocationService.prototype, "getWarehouseLocation")
       .mockResolvedValue(null);
 
-    const response = await request(app)
-      .get("/warehouses/99/locations")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/warehouses/99/locations");
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Configuration introuvable pour cet entrepôt");
   });
 
-  it("validates warehouse identifier", async () => {
-    const response = await request(app)
-      .get("/warehouses/not-a-number/locations")
-      .set("Authorization", authHeader());
+  it("valide l'identifiant d'entrepôt", async () => {
+    const response = await request(app).get(
+      "/warehouses/not-a-number/locations",
+    );
 
     expect(response.status).toBe(400);
     expect(response.body.message).toBe("Données invalides");
   });
 
-  it("creates warehouse layout", async () => {
+  it("exige une authentification pour créer une cartographie", async () => {
+    const createSpy = jest.spyOn(
+      LocationService.prototype,
+      "createWarehouseLocation",
+    );
+    const response = await request(app).post("/warehouses/1/locations").send({
+      code: "WHS-001",
+      layout: [],
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.message).toBe("Non autorisé");
+    expect(createSpy).not.toHaveBeenCalled();
+  });
+
+  it("crée une cartographie d'entrepôt", async () => {
     const layoutPayload: WarehouseLocationCreateProps = {
       code: "WHS-001",
       layout: [
@@ -126,7 +130,7 @@ describe("Location routes", () => {
     expect(createSpy).toHaveBeenCalledWith(1, payload);
   });
 
-  it("propagates creation conflicts", async () => {
+  it("propage les conflits de création", async () => {
     jest
       .spyOn(LocationService.prototype, "createWarehouseLocation")
       .mockRejectedValue(
@@ -160,7 +164,7 @@ describe("Location routes", () => {
     expect(response.body.message).toBe("La configuration existe déjà pour cet entrepôt");
   });
 
-  it("updates warehouse layout", async () => {
+  it("met à jour la cartographie d'entrepôt", async () => {
     const updateSpy = jest
       .spyOn(LocationService.prototype, "updateWarehouseLocation")
       .mockResolvedValue(
@@ -184,7 +188,7 @@ describe("Location routes", () => {
     });
   });
 
-  it("propagates update errors", async () => {
+  it("propage les erreurs de mise à jour", async () => {
     jest
       .spyOn(LocationService.prototype, "updateWarehouseLocation")
       .mockRejectedValue(
@@ -200,14 +204,12 @@ describe("Location routes", () => {
     expect(response.body.message).toBe("Configuration introuvable pour cet entrepôt");
   });
 
-  it("checks if a bin exists", async () => {
+  it("vérifie l'existence d'un emplacement", async () => {
     const existsSpy = jest
       .spyOn(LocationService.prototype, "binExists")
       .mockResolvedValue(true);
 
-    const response = await request(app)
-      .get("/locations/A1-R1-L1-B01/exists")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/locations/A1-R1-L1-B01/exists");
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({

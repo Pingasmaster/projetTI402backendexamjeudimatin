@@ -1,3 +1,4 @@
+// Ce fichier teste les routes entrepôt telles qu'attendues par StockLink Pro.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";
@@ -5,27 +6,31 @@ import { WarehouseService } from "../src/services/warehouseService";
 import { Warehouse } from "../src/models/warehouse";
 import { AppError } from "../src/middlewares/errorHandler";
 
-const authHeader = () =>
+const authHeader = (role: "user" | "admin" = "user") =>
   `Bearer ${signToken({
-    sub: "admin",
-    email: process.env.ADMIN_EMAIL as string,
-    role: "admin",
+    sub: "1",
+    username: `${role}-tester`,
+    role,
   })}`;
 
-describe("Warehouse routes", () => {
+describe("Routes entrepôts", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("requires authentication", async () => {
-    const listSpy = jest.spyOn(WarehouseService.prototype, "listWarehouses");
-    const response = await request(app).get("/warehouses");
+  it("exige une authentification pour créer un entrepôt", async () => {
+    const createSpy = jest.spyOn(WarehouseService.prototype, "createWarehouse");
+    const response = await request(app).post("/warehouses").send({
+      name: "Entrepôt Paris",
+      location: "Paris",
+    });
 
     expect(response.status).toBe(401);
-    expect(listSpy).not.toHaveBeenCalled();
+    expect(response.body.message).toBe("Non autorisé");
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("lists warehouses", async () => {
+  it("liste les entrepôts sans jeton", async () => {
     const listSpy = jest
       .spyOn(WarehouseService.prototype, "listWarehouses")
       .mockResolvedValue([
@@ -38,16 +43,14 @@ describe("Warehouse routes", () => {
         }),
     ]);
 
-    const response = await request(app)
-      .get("/warehouses")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/warehouses");
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
     expect(listSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("retrieves a warehouse by id", async () => {
+  it("récupère un entrepôt par identifiant", async () => {
     const getSpy = jest
       .spyOn(WarehouseService.prototype, "getWarehouse")
       .mockResolvedValue(
@@ -60,29 +63,25 @@ describe("Warehouse routes", () => {
         }),
       );
 
-    const response = await request(app)
-      .get("/warehouses/2")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/warehouses/2");
 
     expect(response.status).toBe(200);
     expect(response.body.name).toBe("Entrepôt Lyon");
     expect(getSpy).toHaveBeenCalledWith(2);
   });
 
-  it("returns 404 when warehouse is missing", async () => {
+  it("retourne 404 lorsque l'entrepôt est absent", async () => {
     jest.spyOn(WarehouseService.prototype, "getWarehouse").mockRejectedValue(
       new AppError("Entrepôt introuvable", 404),
     );
 
-    const response = await request(app)
-      .get("/warehouses/999")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/warehouses/999");
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Entrepôt introuvable");
   });
 
-  it("validates warehouse creation payload", async () => {
+  it("valide la charge utile de création d'entrepôt", async () => {
     const createSpy = jest.spyOn(WarehouseService.prototype, "createWarehouse");
     const response = await request(app)
       .post("/warehouses")
@@ -93,7 +92,7 @@ describe("Warehouse routes", () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("creates a warehouse", async () => {
+  it("crée un entrepôt", async () => {
     const createSpy = jest
       .spyOn(WarehouseService.prototype, "createWarehouse")
       .mockResolvedValue(
@@ -119,7 +118,7 @@ describe("Warehouse routes", () => {
     });
   });
 
-  it("updates a warehouse", async () => {
+  it("met à jour un entrepôt", async () => {
     const updateSpy = jest
       .spyOn(WarehouseService.prototype, "updateWarehouse")
       .mockResolvedValue(
@@ -142,7 +141,7 @@ describe("Warehouse routes", () => {
     expect(updateSpy).toHaveBeenCalledWith(4, { name: "Entrepôt Lille" });
   });
 
-  it("propagates update errors", async () => {
+  it("propage les erreurs de mise à jour", async () => {
     jest.spyOn(WarehouseService.prototype, "updateWarehouse").mockRejectedValue(
       new AppError("Entrepôt introuvable", 404),
     );
@@ -156,20 +155,32 @@ describe("Warehouse routes", () => {
     expect(response.body.message).toBe("Entrepôt introuvable");
   });
 
-  it("deletes a warehouse", async () => {
+  it("supprime un entrepôt", async () => {
     const deleteSpy = jest
       .spyOn(WarehouseService.prototype, "deleteWarehouse")
       .mockResolvedValue();
 
     const response = await request(app)
       .delete("/warehouses/5")
-      .set("Authorization", authHeader());
+      .set("Authorization", authHeader("admin"));
 
     expect(response.status).toBe(204);
     expect(deleteSpy).toHaveBeenCalledWith(5);
   });
 
-  it("propagates deletion errors", async () => {
+  it("refuse la suppression pour un profil non admin", async () => {
+    const deleteSpy = jest.spyOn(WarehouseService.prototype, "deleteWarehouse");
+
+    const response = await request(app)
+      .delete("/warehouses/5")
+      .set("Authorization", authHeader());
+
+    expect(response.status).toBe(403);
+    expect(response.body.message).toBe("Accès interdit");
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
+
+  it("propage les erreurs de suppression", async () => {
     jest
       .spyOn(WarehouseService.prototype, "deleteWarehouse")
       .mockRejectedValue(
@@ -178,7 +189,7 @@ describe("Warehouse routes", () => {
 
     const response = await request(app)
       .delete("/warehouses/999")
-      .set("Authorization", authHeader());
+      .set("Authorization", authHeader("admin"));
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Entrepôt introuvable");

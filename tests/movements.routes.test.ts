@@ -1,3 +1,4 @@
+// Ce fichier s'assure que les routes de mouvement tiennent leurs promesses.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";
@@ -7,26 +8,30 @@ import { AppError } from "../src/middlewares/errorHandler";
 
 const authHeader = () =>
   `Bearer ${signToken({
-    sub: "admin",
-    email: process.env.ADMIN_EMAIL as string,
-    role: "admin",
+    sub: "1",
+    username: "tester",
+    role: "user",
   })}`;
 
-describe("Movement routes", () => {
+describe("Routes mouvements", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("rejects unauthenticated access", async () => {
-    const listSpy = jest.spyOn(MovementService.prototype, "listMovements");
-    const response = await request(app).get("/movements");
+  it("exige une authentification pour créer un mouvement", async () => {
+    const createSpy = jest.spyOn(MovementService.prototype, "createMovement");
+    const response = await request(app).post("/movements").send({
+      type: "IN",
+      quantity: 5,
+      product_id: 2,
+    });
 
     expect(response.status).toBe(401);
     expect(response.body.message).toBe("Non autorisé");
-    expect(listSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("lists movements", async () => {
+  it("liste les mouvements", async () => {
     const listSpy = jest
       .spyOn(MovementService.prototype, "listMovements")
       .mockResolvedValue([
@@ -39,16 +44,14 @@ describe("Movement routes", () => {
       }),
     ]);
 
-    const response = await request(app)
-      .get("/movements")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/movements");
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
     expect(listSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("validates movement creation payload", async () => {
+  it("valide la charge utile de création de mouvement", async () => {
     const createSpy = jest.spyOn(MovementService.prototype, "createMovement");
     const response = await request(app)
       .post("/movements")
@@ -60,7 +63,7 @@ describe("Movement routes", () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("creates a movement", async () => {
+  it("crée un mouvement", async () => {
     const createdAt = new Date("2024-02-02T10:00:00.000Z");
     const createSpy = jest
       .spyOn(MovementService.prototype, "createMovement")
@@ -95,7 +98,7 @@ describe("Movement routes", () => {
     });
   });
 
-  it("returns domain errors from the service layer", async () => {
+  it("renvoie les erreurs métier du service", async () => {
     jest.spyOn(MovementService.prototype, "createMovement").mockRejectedValue(
       new AppError("Stock insuffisant pour ce mouvement", 400),
     );

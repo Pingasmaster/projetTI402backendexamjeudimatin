@@ -1,3 +1,4 @@
+// Ce fichier prépare l'environnement de tests pour des exécutions tranquilles.
 process.env.PORT = process.env.PORT ?? "4000";
 process.env.NODE_ENV = "test";
 process.env.POSTGRES_HOST = process.env.POSTGRES_HOST ?? "localhost";
@@ -9,5 +10,3 @@ process.env.MONGO_URI = process.env.MONGO_URI ?? "mongodb://localhost:27017/stoc
 process.env.JWT_SECRET = process.env.JWT_SECRET ?? "test-secret";
 process.env.RATE_LIMIT_WINDOW_MS = process.env.RATE_LIMIT_WINDOW_MS ?? "900000";
 process.env.RATE_LIMIT_MAX = process.env.RATE_LIMIT_MAX ?? "100";
-process.env.ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? "admin@stocklink.local";
-process.env.ADMIN_PASSWORD = process.env.ADMIN_PASSWORD ?? "admin123";

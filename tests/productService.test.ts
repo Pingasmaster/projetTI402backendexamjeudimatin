@@ -1,3 +1,4 @@
+// Ce fichier protège la logique produit avec des assertions précises.
 import { AppError } from "../src/middlewares/errorHandler";
 import { ProductService } from "../src/services/productService";
 
@@ -12,13 +13,13 @@ import { postgresPool } from "../src/config/postgres";
 const queryMock = postgresPool.query as jest.Mock;
 let service: ProductService;
 
-describe("productService", () => {
+describe("Service productService", () => {
   beforeEach(() => {
     queryMock.mockReset();
     service = new ProductService(postgresPool as unknown as any);
   });
 
-  it("fetches products ordered by id", async () => {
+  it("récupère les produits ordonnés par identifiant", async () => {
     queryMock.mockResolvedValue({
       rows: [
         {
@@ -39,7 +40,7 @@ describe("productService", () => {
     );
   });
 
-  it("creates a product", async () => {
+  it("crée un produit", async () => {
     queryMock.mockResolvedValue({
       rows: [
         {
@@ -66,7 +67,7 @@ describe("productService", () => {
     );
   });
 
-  it("updates provided fields", async () => {
+  it("met à jour les champs fournis", async () => {
     queryMock.mockResolvedValue({
       rowCount: 1,
       rows: [
@@ -89,7 +90,7 @@ describe("productService", () => {
     );
   });
 
-  it("returns existing product when no updates were provided", async () => {
+  it("retourne le produit existant quand rien ne change", async () => {
     queryMock.mockResolvedValue({
       rowCount: 1,
       rows: [
@@ -112,7 +113,7 @@ describe("productService", () => {
     );
   });
 
-  it("throws when product to refresh does not exist", async () => {
+  it("lève une erreur si le produit n'existe pas", async () => {
     queryMock.mockResolvedValue({
       rowCount: 0,
       rows: [],
@@ -121,7 +122,7 @@ describe("productService", () => {
     await expect(service.updateProduct(999, {})).rejects.toThrow(AppError);
   });
 
-  it("throws when update does not affect any product", async () => {
+  it("lève une erreur quand aucune mise à jour n'est appliquée", async () => {
     queryMock.mockResolvedValue({
       rowCount: 0,
       rows: [],
@@ -132,7 +133,7 @@ describe("productService", () => {
     ).rejects.toThrow(AppError);
   });
 
-  it("deletes an existing product", async () => {
+  it("supprime un produit existant", async () => {
     queryMock.mockResolvedValue({
       rowCount: 1,
     });
@@ -145,7 +146,7 @@ describe("productService", () => {
     );
   });
 
-  it("throws when deleting a missing product", async () => {
+  it("lève une erreur si le produit à supprimer est absent", async () => {
     queryMock.mockResolvedValue({
       rowCount: 0,
     });

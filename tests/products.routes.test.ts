@@ -1,3 +1,4 @@
+// Ce fichier vérifie les routes produits du point de vue d'un client.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";
@@ -5,28 +6,33 @@ import { ProductService } from "../src/services/productService";
 import { Product } from "../src/models/product";
 import { AppError } from "../src/middlewares/errorHandler";
 
-const authHeader = () =>
+const authHeader = (role: "user" | "admin" = "user") =>
   `Bearer ${signToken({
-    sub: "admin",
-    email: process.env.ADMIN_EMAIL as string,
-    role: "admin",
+    sub: "1",
+    username: `${role}-tester`,
+    role,
   })}`;
 
-describe("Product routes", () => {
+describe("Routes produits", () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
-  it("requires authentication", async () => {
-    const listSpy = jest.spyOn(ProductService.prototype, "listProducts");
-    const response = await request(app).get("/products");
+  it("exige une authentification pour la création", async () => {
+    const createSpy = jest.spyOn(ProductService.prototype, "createProduct");
+    const response = await request(app).post("/products").send({
+      name: "Test",
+      reference: "SKU-000",
+      quantity: 1,
+      warehouse_id: 1,
+    });
 
     expect(response.status).toBe(401);
     expect(response.body.message).toBe("Non autorisé");
-    expect(listSpy).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("lists products", async () => {
+  it("liste les produits sans authentification", async () => {
     const listSpy = jest
       .spyOn(ProductService.prototype, "listProducts")
       .mockResolvedValue([
@@ -41,16 +47,14 @@ describe("Product routes", () => {
         }),
       ]);
 
-    const response = await request(app)
-      .get("/products")
-      .set("Authorization", authHeader());
+    const response = await request(app).get("/products");
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
     expect(listSpy).toHaveBeenCalledTimes(1);
   });
 
-  it("validates product creation payload", async () => {
+  it("valide la charge utile de création de produit", async () => {
     const createSpy = jest.spyOn(ProductService.prototype, "createProduct");
     const response = await request(app)
       .post("/products")
@@ -62,7 +66,7 @@ describe("Product routes", () => {
     expect(createSpy).not.toHaveBeenCalled();
   });
 
-  it("creates a product", async () => {
+  it("crée un produit", async () => {
     const createSpy = jest
       .spyOn(ProductService.prototype, "createProduct")
       .mockResolvedValue(
@@ -97,7 +101,7 @@ describe("Product routes", () => {
     });
   });
 
-  it("updates a product", async () => {
+  it("met à jour un produit", async () => {
     const updateSpy = jest
       .spyOn(ProductService.prototype, "updateProduct")
       .mockResolvedValue(
@@ -122,7 +126,7 @@ describe("Product routes", () => {
     expect(updateSpy).toHaveBeenCalledWith(3, { quantity: 12 });
   });
 
-  it("propagates product update errors", async () => {
+  it("propage les erreurs de mise à jour produit", async () => {
     jest.spyOn(ProductService.prototype, "updateProduct").mockRejectedValue(
       new AppError("Produit introuvable", 404),
     );
@@ -136,27 +140,39 @@ describe("Product routes", () => {
     expect(response.body.message).toBe("Produit introuvable");
   });
 
-  it("deletes a product", async () => {
+  it("supprime un produit", async () => {
     const deleteSpy = jest
       .spyOn(ProductService.prototype, "deleteProduct")
       .mockResolvedValue();
 
     const response = await request(app)
       .delete("/products/5")
-      .set("Authorization", authHeader());
+      .set("Authorization", authHeader("admin"));
 
     expect(response.status).toBe(204);
     expect(deleteSpy).toHaveBeenCalledWith(5);
   });
 
-  it("propagates product deletion errors", async () => {
+  it("refuse la suppression pour un rôle non admin", async () => {
+    const deleteSpy = jest.spyOn(ProductService.prototype, "deleteProduct");
+
+    const response = await request(app)
+      .delete("/products/5")
+      .set("Authorization", authHeader());
+
+    expect(response.status).toBe(403);
+    expect(response.body.message).toBe("Accès interdit");
+    expect(deleteSpy).not.toHaveBeenCalled();
+  });
+
+  it("propage les erreurs de suppression produit", async () => {
     jest.spyOn(ProductService.prototype, "deleteProduct").mockRejectedValue(
       new AppError("Produit introuvable", 404),
     );
 
     const response = await request(app)
       .delete("/products/999")
-      .set("Authorization", authHeader());
+      .set("Authorization", authHeader("admin"));
 
     expect(response.status).toBe(404);
     expect(response.body.message).toBe("Produit introuvable");

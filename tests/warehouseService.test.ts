@@ -1,3 +1,4 @@
+// Ce fichier contrôle le service entrepôt dans les moindres détails.
 import { AppError } from "../src/middlewares/errorHandler";
 import { WarehouseService } from "../src/services/warehouseService";
 
@@ -12,13 +13,13 @@ import { postgresPool } from "../src/config/postgres";
 const queryMock = postgresPool.query as jest.Mock;
 let service: WarehouseService;
 
-describe("warehouseService", () => {
+describe("Service warehouseService", () => {
   beforeEach(() => {
     queryMock.mockReset();
     service = new WarehouseService(postgresPool as unknown as any);
   });
 
-  it("lists warehouses ordered by id", async () => {
+  it("liste les entrepôts par identifiant croissant", async () => {
     queryMock.mockResolvedValue({
       rows: [
         { id: 1, name: "Entrepôt Paris", location: "Paris" },
@@ -33,7 +34,7 @@ describe("warehouseService", () => {
     );
   });
 
-  it("retrieves a warehouse", async () => {
+  it("récupère un entrepôt", async () => {
     queryMock.mockResolvedValue({
       rowCount: 1,
       rows: [{ id: 5, name: "Entrepôt Lille", location: "Lille" }],
@@ -47,7 +48,7 @@ describe("warehouseService", () => {
     );
   });
 
-  it("throws when warehouse is missing", async () => {
+  it("lève une erreur si l'entrepôt est absent", async () => {
     queryMock.mockResolvedValue({
       rowCount: 0,
       rows: [],
@@ -56,7 +57,7 @@ describe("warehouseService", () => {
     await expect(service.getWarehouse(999)).rejects.toThrow(AppError);
   });
 
-  it("creates a warehouse", async () => {
+  it("crée un entrepôt", async () => {
     queryMock.mockResolvedValue({
       rows: [{ id: 10, name: "Entrepôt Marseille", location: "Marseille" }],
     });
@@ -73,7 +74,7 @@ describe("warehouseService", () => {
     );
   });
 
-  it("updates a warehouse", async () => {
+  it("met à jour un entrepôt", async () => {
     queryMock.mockResolvedValue({
       rowCount: 1,
       rows: [{ id: 3, name: "Entrepôt Brest", location: "Brest" }],
@@ -87,7 +88,7 @@ describe("warehouseService", () => {
     );
   });
 
-  it("returns existing warehouse when no updates provided", async () => {
+  it("retourne l'entrepôt existant quand rien ne change", async () => {
     queryMock.mockResolvedValueOnce({
       rowCount: 1,
       rows: [{ id: 4, name: "Entrepôt Nice", location: "Nice" }],
@@ -101,7 +102,7 @@ describe("warehouseService", () => {
     );
   });
 
-  it("throws when update targets a missing warehouse", async () => {
+  it("lève une erreur quand l'entrepôt visé manque", async () => {
     queryMock.mockResolvedValue({
       rowCount: 0,
       rows: [],
@@ -112,7 +113,7 @@ describe("warehouseService", () => {
     ).rejects.toThrow(AppError);
   });
 
-  it("deletes a warehouse", async () => {
+  it("supprime un entrepôt", async () => {
     queryMock.mockResolvedValue({
       rowCount: 1,
     });
@@ -121,7 +122,7 @@ describe("warehouseService", () => {
     expect(queryMock).toHaveBeenCalledWith("DELETE FROM warehouses WHERE id = $1", [2]);
   });
 
-  it("throws when deleting a missing warehouse", async () => {
+  it("lève une erreur si l'entrepôt à supprimer ne répond pas", async () => {
     queryMock.mockResolvedValue({
       rowCount: 0,
     });
