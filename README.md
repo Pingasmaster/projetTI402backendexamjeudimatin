@@ -56,6 +56,7 @@ stocklink-core/
 │   └── swagger.ts         # Définition OpenAPI
 ├── .env.example
 ├── package.json
+├── reponses_sauvegarde.txt # Fichier réponse demandé
 ├── tsconfig.json
 └── README.md
 ```
