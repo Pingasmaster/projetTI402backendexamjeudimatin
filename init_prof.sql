@@ -1,3 +1,4 @@
+-- script d'init du prof, j'utilise mon propre script un peu différent
 -- ============================================
 --   Script de création de la base StockLink
 -- ============================================

@@ -1,4 +1,4 @@
--- Warehouses hold the physical storage locations for inventory.
+-- Création table warehouse
 CREATE TABLE IF NOT EXISTS warehouses (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS warehouses (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Products reference a warehouse and track available stock.
+-- Pareil produits en fct des stocks dispo
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS products (
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Ensure the enum type for stock movements exists before creating dependent tables.
+-- Enum est fait, pas VAR pour s'assurer que les mouvs sont possibles et que les stocks existent.
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'movement_type') THEN
@@ -26,7 +26,7 @@ BEGIN
     END IF;
 END$$;
 
--- Movements record stock changes for a product using the movement type enum.
+-- Changement de stock en utilisant enum. 
 CREATE TABLE IF NOT EXISTS movements (
     id SERIAL PRIMARY KEY,
     type movement_type NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS movements (
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
 
--- Keep updated_at columns in sync by updating timestamps on data changes.
+-- Garde les colonnes updated_at synchro en mettant à jour les timestamps quand les données changent.
 CREATE OR REPLACE FUNCTION update_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -44,13 +44,13 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Automatically refresh updated_at when product rows change.
+-- Rafraîchit les updated_at quand les produits changent
 CREATE TRIGGER products_update_timestamp
 BEFORE UPDATE ON products
 FOR EACH ROW
 EXECUTE FUNCTION update_timestamp();
 
--- Automatically refresh updated_at when warehouse rows change.
+-- Pareil pour warehouse
 CREATE TRIGGER warehouses_update_timestamp
 BEFORE UPDATE ON warehouses
 FOR EACH ROW
