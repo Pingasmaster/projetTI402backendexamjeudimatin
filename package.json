@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/src/server.js",
     "openapi:build": "ts-node scripts/generate-openapi.ts",
-    "test": "node --require ts-node/register ./node_modules/jest/bin/jest.js --config jest-conf.ts"
+    "test": "node --require ./node_modules/ts-node/register ./node_modules/jest/bin/jest.js --config jest-conf.ts"
   },
   "keywords": [],
   "author": "Adrian NOYES",
