@@ -1,3 +1,4 @@
+// Ce fichier coordonne les échanges autour des produits avec sobriété.
 import { Request, Response } from "express";
 import {
   ProductCreateProps,

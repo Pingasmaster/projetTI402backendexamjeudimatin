@@ -1,3 +1,4 @@
+// Ce fichier orchestre les opérations produit pour que le stock reste cohérent.
 import { Pool } from "pg";
 import { postgresPool } from "../config/postgres";
 import {

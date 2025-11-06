@@ -1,3 +1,4 @@
+// Ce fichier transforme les requêtes entrepôt en réponses utiles pour le terrain.
 import { Request, Response } from "express";
 import {
   WarehouseCreateProps,

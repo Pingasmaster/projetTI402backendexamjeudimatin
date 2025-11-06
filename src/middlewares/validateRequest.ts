@@ -1,3 +1,4 @@
+// Ce fichier filtre les requêtes dès l'entrée pour préserver la qualité des données.
 import { ZodTypeAny, ZodIssue } from "zod";
 import { Request, Response, NextFunction } from "express";
 

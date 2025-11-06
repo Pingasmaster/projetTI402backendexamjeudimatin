@@ -1,3 +1,4 @@
+// Ce fichier met en musique les middlewares et routes pour proposer l'expérience StockLink Pro.
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -25,7 +26,7 @@ app.use(
 );
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
   }),
 );

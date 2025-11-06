@@ -1,3 +1,4 @@
+// Ce fichier donne forme aux mouvements de stock.
 export type MovementType = "IN" | "OUT";
 
 export interface MovementProps {

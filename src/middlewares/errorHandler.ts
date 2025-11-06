@@ -1,3 +1,4 @@
+// Ce fichier centralise les erreurs pour offrir des retours lisibles.
 import { NextFunction, Request, Response } from "express";
 
 export class AppError extends Error {

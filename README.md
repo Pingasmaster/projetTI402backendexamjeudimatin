@@ -1,121 +1,99 @@
-# Projet backend stocklink api
+# StockLink Pro API
 
-Ce projet adopte une architecture MVC avec typescript comme demandé, expose une documentation OpenAPI/Swagger comme vu en cours, et se connecte à PostgreSQL (données opérationnelles) ainsi qu'à MongoDB (cartographie interne).
+API professionnelle sécurisée pour la gestion des stocks multi-entrepôts. Elle expose une documentation Swagger, applique une validation stricte des entrées et protège toutes les opérations sensibles par JWT et contrôle de rôle.
 
-## Sommaire
+## Mise en route
 
-- [Prérequis](#prérequis)
-- [Installation](#installation)
-- [Scripts disponibles](#scripts-disponibles)
-- [Tests](#tests)
-- [Structure du projet](#structure-du-projet)
-- [Base de données](#base-de-données)
-- [Sécurité](#sécurité)
-- [Documentation API](#documentation-api)
-- [Endpoints principaux](#endpoints-principaux)
+1. Copier la configuration : `cp .env.example .env` puis adapter les valeurs (PostgreSQL, MongoDB, `JWT_SECRET`).
+2. Installer les dépendances : `npm install`.
+3. Initialiser la base PostgreSQL : `psql -U <user> -f init_db.sql`.
+4. Lancer l'API en développement : `npm run dev` (ou `npm start` après `npm run build`).
 
-## Prérequis
+## Configuration JWT
 
-- Node.js, npm, PostgreSQL, MongoDB installés
-- Les serveurs PostgreSQL et MongoDB sont lancés en arrière plan
-- Copiez .env.example à .env, faites en sorte que l'utilisateur et le mot de passe Postgresql soit bon. Créer l'utilisateur stocklink si besoin.
-
-## Installation
-
-```bash
-npm install
-```
+- La clé secrète est définie via la variable `JWT_SECRET` dans `.env`.
+- Pour générer une clé 256 bits : `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`.
+- Tout jeton inclut l'`id`, le `username` et le `role` de l'utilisateur.
 
 ## Scripts disponibles
 
 | Commande | Description |
 |----------|-------------|
-| `npm run build` | Compile le projet TypeScript dans `dist/` (les sources se retrouvent sous `dist/src`). |
-| `npm run test` | Voir la section Tests |
-| `npm run dev` | Démarre l'API en mode développement via `ts-node`. |
+| `npm run dev` | Démarre l'API en mode développement (ts-node). |
+| `npm run build` | Compile TypeScript vers `dist/`. |
 | `npm start` | Lance la version compilée (`node dist/src/server.js`). |
-| `npm run doc` | Génère `openapi.json` à partir de la configuration Swagger (nécessite `npm run build` si vous lancez la version compilée). |
+| `npm run doc` | Génère `openapi.json` depuis `src/swagger.ts`. |
+| `npm test` | Lance la suite Jest (unitaires + intégration). |
 
 ## Tests
 
-- `npm test` lance la suite Jest (ma suite de tests favorite!).
+- Exécution : `npm test`
+- La suite couvre :
+  - la logique métier de mise à jour de stock (services),
+  - la validation et la gestion d'erreur sur les routes clés,
+  - un test d'intégration `/auth/login`.
 
-Pour repartir d’un environnement propre et vérifier le projet de bout en bout :
+## Sécurité intégrée
 
-```bash
-rm -rf dist/ node_modules/ && npm install && npm run build && npm run test && npm run doc && npm run start
-```
+- `helmet` pour durcir les en-têtes HTTP.
+- `cors` limité à `http://localhost:3000`.
+- Rate limiting : 100 requêtes / 15 minutes par adresse IP.
+- Validation des payloads avec Zod sur `auth`, `products`, `movements`, `warehouses` et `locations`.
+- Mots de passe hachés avec bcrypt et gestion des rôles (`user` / `admin`).
 
-Ensuite on peut naviguer vers http://localhost:`PORT`/docs pour voir la documentation swagger et tester l'api manuellement.
+## Documentation API
+
+- Swagger UI : `http://localhost:${PORT}/docs`
+- Spécification JSON : `http://localhost:${PORT}/openapi.json`
+- ReDoc : `http://localhost:${PORT}/redoc`
+
+## Routes et niveau de protection
+
+| Méthode | Endpoint | Accès |
+|---------|----------|-------|
+| POST | `/auth/register` | Libre |
+| POST | `/auth/login` | Libre |
+| GET | `/health` | Libre |
+| GET | `/products` | Libre |
+| POST | `/products` | Authentifié |
+| PUT | `/products/:id` | Authentifié |
+| DELETE | `/products/:id` | Admin |
+| GET | `/movements` | Libre |
+| POST | `/movements` | Authentifié |
+| GET | `/warehouses` | Libre |
+| POST | `/warehouses` | Authentifié |
+| PUT | `/warehouses/:id` | Authentifié |
+| DELETE | `/warehouses/:id` | Admin |
+| GET | `/warehouses/:id/locations` | Libre |
+| POST | `/warehouses/:id/locations` | Authentifié |
+| PUT | `/warehouses/:id/locations` | Authentifié |
+| GET | `/locations/:binCode/exists` | Libre |
 
 ## Structure du projet
 
 ```
 stocklink-core/
-├── init_db.sql            # Script SQL PostgreSQL
+├── init_db.sql            # Script de création (inclut la table users)
 ├── src/
 │   ├── app.ts             # Configuration Express + middlewares
-│   ├── server.ts          # Point d’entrée serveur
+│   ├── server.ts          # Point d’entrée
 │   ├── config/            # Connexions PG & Mongo, variables d'environnement
 │   ├── controllers/       # Logique HTTP
-│   ├── middlewares/       # Auth, validation, erreurs...
-│   ├── models/            # Types TypeScript
-│   ├── routes/            # Déclarations des routes
-│   ├── schemas/           # Schémas Zod (validation)
-│   ├── services/          # Accès aux données / logique métier
+│   ├── middlewares/       # Auth, validation, rôles, erreurs
+│   ├── models/            # Types (produits, mouvements, users…)
+│   ├── routes/            # Déclarations des endpoints
+│   ├── schemas/           # Schémas Zod
+│   ├── services/          # Accès données / règles métier
 │   ├── utils/             # Helpers (JWT, async handler)
-│   ├── swagger.ts         # Définition OpenAPI
-│   └── openapi-doc.ts # Script de génération OpenAPI
+│   └── swagger.ts         # Définition OpenAPI
+├── tests/                 # Tests unitaires et d’intégration
 ├── .env.example
-├── package.json
-├── reponses_sauvegarde.txt # Fichier réponse demandé
-├── tsconfig.json
 └── README.md
 ```
 
-## Base de données
+## Bases de données
 
-- **PostgreSQL** : tables `warehouses`, `products`, `movements` (script SQL dans `init_db.sql`).
-- **MongoDB** : collection `locations` décrivant la disposition interne des entrepôts.
+- **PostgreSQL** : tables `users`, `warehouses`, `products`, `movements`.
+- **MongoDB** : collection `locations` pour la cartographie interne.
 
-## Sécurité
-
-- Authentification JWT (route `POST /auth/login`) via identifiants définis dans `.env`.
-- Middleware `authenticate` protège toutes les routes métier.
-- `helmet`, `cors`, `express-rate-limit` pour renforcer la sécurité HTTPS (devrait être en prod, ici est http car pas de certificat web évidemment car pas de domaine).
-- Validation des entrées avec Zod et gestion centralisée des erreurs (touche personelle que j'aime bien)
-
-## Documentation API
-
-- Swagger UI : http://localhost:`PORT`/docs
-- ReDoc (lecture seule) : http://localhost:`PORT`/redoc
-- Spec JSON : http://localhost:`PORT`/openapi.json
-
-Générez la doc avec :
-
-```bash
-npm run doc
-```
-
-## Endpoints principaux
-
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/auth/login` | Obtenir un token JWT. |
-| GET | `/warehouses` | Lister les entrepôts (JWT requis). |
-| GET | `/warehouses/:id` | Consulter un entrepôt donné. |
-| POST | `/warehouses` | Créer un entrepôt. |
-| PUT | `/warehouses/:id` | Mettre à jour un entrepôt. |
-| DELETE | `/warehouses/:id` | Supprimer un entrepôt. |
-| GET | `/products` | Liste des produits (JWT requis). |
-| POST | `/products` | Créer un produit. |
-| PUT | `/products/:id` | Mettre à jour un produit. |
-| DELETE | `/products/:id` | Supprimer un produit. |
-| GET | `/warehouses/:id/locations` | Récupérer la cartographie d’un entrepôt. |
-| POST | `/warehouses/:id/locations` | Créer la cartographie d’un entrepôt. |
-| PUT | `/warehouses/:id/locations` | Mettre à jour la cartographie. |
-| GET | `/locations/:binCode/exists` | Vérifier l’existence d’un bac. |
-| GET | `/movements` | Historique des mouvements de stock. |
-| POST | `/movements` | Enregistrer un mouvement (met à jour le stock). |
-
-Toutes ces routes (hors `/auth/login` & `/health`) nécessitent un token Bearer valide.
+Bon déploiement !

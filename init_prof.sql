@@ -18,6 +18,19 @@ CREATE TABLE warehouses (
 );
 
 -- ============================================
+-- TABLE 2 : USERS (utilisateurs API)
+-- ============================================
+
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role VARCHAR(20) NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================
 -- TABLE 2 : PRODUCTS (articles stockés)
 -- ============================================
 

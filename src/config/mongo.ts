@@ -1,3 +1,4 @@
+// Ce fichier branche MongoDB pour la cartographie sans friction.
 import { MongoClient } from "mongodb";
 import { env } from "./env";
 

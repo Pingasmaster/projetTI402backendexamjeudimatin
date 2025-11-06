@@ -1,3 +1,4 @@
+// Ce fichier expose des actions limpides autour des mouvements de stock.
 import { Request, Response } from "express";
 import { MovementCreateProps } from "../models/movement";
 import { MovementService } from "../services/movementService";

@@ -9,11 +9,12 @@ import { authenticate } from "../middlewares/authMiddleware";
 import { asyncHandler } from "../utils/asyncHandler";
 import { ProductController } from "../controllers/productController";
 import { ProductService } from "../services/productService";
+import { isAdmin } from "../middlewares/isAdmin";
 
 const router = Router();
 const productController = new ProductController(new ProductService());
 
-router.get("/", authenticate, asyncHandler(productController.getProducts));
+router.get("/", asyncHandler(productController.getProducts));
 router.post(
   "/",
   authenticate,
@@ -29,6 +30,7 @@ router.put(
 router.delete(
   "/:id",
   authenticate,
+  isAdmin,
   validateRequest(deleteProductSchema),
   asyncHandler(productController.removeProduct),
 );

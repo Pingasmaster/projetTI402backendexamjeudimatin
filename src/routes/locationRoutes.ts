@@ -14,8 +14,6 @@ import { LocationService } from "../services/locationService";
 export const warehouseLocationRouter = Router({ mergeParams: true });
 const locationController = new LocationController(new LocationService());
 
-warehouseLocationRouter.use(authenticate);
-
 warehouseLocationRouter.get(
   "/",
   validateRequest(getWarehouseLocationSchema),
@@ -23,11 +21,13 @@ warehouseLocationRouter.get(
 );
 warehouseLocationRouter.post(
   "/",
+  authenticate,
   validateRequest(createWarehouseLocationSchema),
   asyncHandler(locationController.createWarehouseLocations),
 );
 warehouseLocationRouter.put(
   "/",
+  authenticate,
   validateRequest(updateWarehouseLocationSchema),
   asyncHandler(locationController.updateWarehouseLocations),
 );
@@ -36,7 +36,6 @@ export const locationLookupRouter = Router();
 
 locationLookupRouter.get(
   "/:binCode/exists",
-  authenticate,
   validateRequest(binExistsSchema),
   asyncHandler(locationController.getBinExists),
 );

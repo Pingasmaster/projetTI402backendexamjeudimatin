@@ -10,11 +10,10 @@ import {
 import { asyncHandler } from "../utils/asyncHandler";
 import { WarehouseController } from "../controllers/warehouseController";
 import { WarehouseService } from "../services/warehouseService";
+import { isAdmin } from "../middlewares/isAdmin";
 
 const router = Router();
 const warehouseController = new WarehouseController(new WarehouseService());
-
-router.use(authenticate);
 
 router.get("/", asyncHandler(warehouseController.getWarehouses));
 router.get(
@@ -24,16 +23,20 @@ router.get(
 );
 router.post(
   "/",
+  authenticate,
   validateRequest(createWarehouseSchema),
   asyncHandler(warehouseController.postWarehouse),
 );
 router.put(
   "/:id",
+  authenticate,
   validateRequest(updateWarehouseSchema),
   asyncHandler(warehouseController.putWarehouse),
 );
 router.delete(
   "/:id",
+  authenticate,
+  isAdmin,
   validateRequest(deleteWarehouseSchema),
   asyncHandler(warehouseController.removeWarehouse),
 );

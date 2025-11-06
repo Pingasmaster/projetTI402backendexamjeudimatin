@@ -1,3 +1,4 @@
+// Ce fichier formalise le modèle produit utilisé côté serveur.
 export interface ProductProps {
   id: number;
   name: string;

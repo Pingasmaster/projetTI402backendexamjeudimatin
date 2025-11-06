@@ -1,3 +1,4 @@
+// Ce fichier charge la configuration d'environnement pour sécuriser notre lancement d'API.
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -11,8 +12,6 @@ const requiredEnvVars = [
   "POSTGRES_DB",
   "MONGO_URI",
   "JWT_SECRET",
-  "ADMIN_EMAIL",
-  "ADMIN_PASSWORD",
 ];
 
 requiredEnvVars.forEach((key) => {
@@ -35,8 +34,4 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET as string,
   rateLimitWindowMs: Number(process.env.RATE_LIMIT_WINDOW_MS ?? 15 * 60 * 1000),
   rateLimitMax: Number(process.env.RATE_LIMIT_MAX ?? 100),
-  adminCredentials: {
-    email: process.env.ADMIN_EMAIL as string,
-    password: process.env.ADMIN_PASSWORD as string,
-  },
 };

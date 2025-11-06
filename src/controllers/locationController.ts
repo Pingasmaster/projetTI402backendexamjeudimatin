@@ -1,3 +1,4 @@
+// Ce fichier restitue les plans d'entrepôt avec rigueur.
 import { Request, Response } from "express";
 import {
   WarehouseLocationCreateProps,

@@ -1,3 +1,4 @@
+// Ce fichier structure les emplacements logistiques dans le code.
 export interface LocationLevelProps {
   level: number;
   bins: string[];

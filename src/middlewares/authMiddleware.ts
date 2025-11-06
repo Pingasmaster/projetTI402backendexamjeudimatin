@@ -1,11 +1,13 @@
+// Ce fichier authentifie les requêtes et transmet les rôles avec soin.
 import { Request, Response, NextFunction } from "express";
+import { UserRole } from "../models/user";
 import { verifyToken } from "../utils/jwt";
 
 export interface AuthenticatedRequest extends Request {
   user?: {
-    sub: string;
-    email: string;
-    role: string;
+    id: number;
+    username: string;
+    role: UserRole;
   };
 }
 
@@ -27,7 +29,11 @@ export const authenticate = (
 
   try {
     const decoded = verifyToken(token);
-    req.user = decoded;
+    req.user = {
+      id: Number(decoded.sub),
+      username: decoded.username,
+      role: decoded.role,
+    };
     next();
   } catch (error) {
     return res.status(401).json({

@@ -1,3 +1,4 @@
+// Ce fichier représente les entrepôts dans notre couche métier.
 export interface WarehouseProps {
   id: number;
   name: string;

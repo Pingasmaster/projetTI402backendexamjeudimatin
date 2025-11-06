@@ -1,3 +1,4 @@
+// Ce fichier prépare la connexion PostgreSQL sans compromis sur la stabilité.
 import { Pool } from "pg";
 import { env } from "./env";
 

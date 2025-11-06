@@ -9,7 +9,7 @@ import { MovementService } from "../services/movementService";
 const router = Router();
 const movementController = new MovementController(new MovementService());
 
-router.get("/", authenticate, asyncHandler(movementController.getMovements));
+router.get("/", asyncHandler(movementController.getMovements));
 router.post(
   "/",
   authenticate,

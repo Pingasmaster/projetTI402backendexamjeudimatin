@@ -97,12 +97,25 @@ const swaggerOptions: Options = {
         },
       },
       schemas: {
-        AuthRequest: {
+        AuthRegisterRequest: {
           type: "object",
-          required: ["email", "password"],
+          required: ["username", "password"],
           properties: {
-            email: { type: "string", format: "email", example: "adrian.noyes@efrei.net" },
-            password: { type: "string", example: "changeme" },
+            username: { type: "string", example: "magasinier" },
+            password: { type: "string", example: "motdepasseSecurise" },
+            role: {
+              type: "string",
+              enum: ["user", "admin"],
+              example: "user",
+            },
+          },
+        },
+        AuthLoginRequest: {
+          type: "object",
+          required: ["username", "password"],
+          properties: {
+            username: { type: "string", example: "magasinier" },
+            password: { type: "string", example: "motdepasseSecurise" },
           },
         },
         AuthResponse: {
@@ -238,6 +251,53 @@ const swaggerOptions: Options = {
           },
         },
       },
+      "/auth/register": {
+        post: {
+          tags: ["Auth"],
+          summary: "Créer un compte utilisateur",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AuthRegisterRequest" },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: "Utilisateur créé",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      id: { type: "integer", example: 1 },
+                      username: { type: "string", example: "magasinier" },
+                      role: { type: "string", example: "user" },
+                    },
+                  },
+                },
+              },
+            },
+            409: {
+              description: "Nom d'utilisateur déjà utilisé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            400: {
+              description: "Données invalides",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
       "/auth/login": {
         post: {
           tags: ["Auth"],
@@ -246,7 +306,7 @@ const swaggerOptions: Options = {
             required: true,
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/AuthRequest" },
+                schema: { $ref: "#/components/schemas/AuthLoginRequest" },
               },
             },
           },
@@ -274,7 +334,6 @@ const swaggerOptions: Options = {
         get: {
           tags: ["Products"],
           summary: "Lister les produits",
-          security: [{ BearerAuth: [] }],
           responses: {
             200: {
               description: "Liste des produits",
@@ -375,6 +434,14 @@ const swaggerOptions: Options = {
           ],
           responses: {
             204: { description: "Produit supprimé" },
+            403: {
+              description: "Rôle administrateur requis",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
             404: {
               description: "Produit introuvable",
               content: {
@@ -390,7 +457,6 @@ const swaggerOptions: Options = {
         get: {
           tags: ["Warehouses"],
           summary: "Lister les entrepôts",
-          security: [{ BearerAuth: [] }],
           responses: {
             200: {
               description: "Liste des entrepôts",
@@ -400,14 +466,6 @@ const swaggerOptions: Options = {
                     type: "array",
                     items: { $ref: "#/components/schemas/Warehouse" },
                   },
-                },
-              },
-            },
-            401: {
-              description: "Non autorisé",
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/Error" },
                 },
               },
             },
@@ -457,7 +515,6 @@ const swaggerOptions: Options = {
         get: {
           tags: ["Warehouses"],
           summary: "Récupérer un entrepôt",
-          security: [{ BearerAuth: [] }],
           parameters: [
             {
               name: "id",
@@ -472,14 +529,6 @@ const swaggerOptions: Options = {
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/Warehouse" },
-                },
-              },
-            },
-            401: {
-              description: "Non autorisé",
-              content: {
-                "application/json": {
-                  schema: { $ref: "#/components/schemas/Error" },
                 },
               },
             },
@@ -572,6 +621,14 @@ const swaggerOptions: Options = {
                 },
               },
             },
+            403: {
+              description: "Rôle administrateur requis",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
             404: {
               description: "Entrepôt introuvable",
               content: {
@@ -587,7 +644,6 @@ const swaggerOptions: Options = {
         get: {
           tags: ["Locations"],
           summary: "Récupérer la structure d'un entrepôt",
-          security: [{ BearerAuth: [] }],
           parameters: [
             {
               name: "id",
@@ -698,7 +754,6 @@ const swaggerOptions: Options = {
         get: {
           tags: ["Locations"],
           summary: "Vérifier l'existence d'un bac",
-          security: [{ BearerAuth: [] }],
           parameters: [
             {
               name: "binCode",
@@ -730,7 +785,6 @@ const swaggerOptions: Options = {
         get: {
           tags: ["Movements"],
           summary: "Lister les mouvements de stock",
-          security: [{ BearerAuth: [] }],
           responses: {
             200: {
               description: "Liste des mouvements",
