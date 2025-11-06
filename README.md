@@ -1,12 +1,13 @@
 # Projet backend stocklink api
 
-Ce projet adopte une architecture MVC avec TypeScript comme demandé, expose une documentation OpenAPI/Swagger comme vu en cours, et se connecte à PostgreSQL (données opérationnelles) ainsi qu'à MongoDB (cartographie interne).
+Ce projet adopte une architecture MVC avec typescript comme demandé, expose une documentation OpenAPI/Swagger comme vu en cours, et se connecte à PostgreSQL (données opérationnelles) ainsi qu'à MongoDB (cartographie interne).
 
 ## Sommaire
 
 - [Prérequis](#prérequis)
 - [Installation](#installation)
 - [Scripts disponibles](#scripts-disponibles)
+- [Tests](#tests)
 - [Structure du projet](#structure-du-projet)
 - [Base de données](#base-de-données)
 - [Sécurité](#sécurité)
@@ -29,20 +30,23 @@ npm install
 
 | Commande | Description |
 |----------|-------------|
-| `npm run dev` | Démarre l'API en mode développement via `ts-node`. |
 | `npm run build` | Compile le projet TypeScript dans `dist/` (les sources se retrouvent sous `dist/src`). |
+| `npm run test` | Voir la section Tests |
+| `npm run dev` | Démarre l'API en mode développement via `ts-node`. |
 | `npm start` | Lance la version compilée (`node dist/src/server.js`). |
 | `npm run openapi:build` | Génère `openapi.json` à partir de la configuration Swagger (nécessite `npm run build` si vous lancez la version compilée). |
 
 ## Tests
 
-- `npm test` lance la suite Jest (tests d’intégration HTTP via Supertest et tests unitaires des services).
+- `npm test` lance la suite Jest (ma suite de tests favorite!).
 
 Pour repartir d’un environnement propre et vérifier le projet de bout en bout :
 
 ```bash
 rm -rf dist/ node_modules/ && npm install && npm run build && npm run test && npm run openapi:build && npm run start
 ```
+
+Ensuite on peut naviguer vers http://localhost:`PORT`/docs pour voir la documentation swagger et tester l'api manuellement.
 
 ## Structure du projet
 

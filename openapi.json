@@ -1,14 +1,14 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "StockLink Core API",
+    "title": "Stocklink API",
     "version": "1.0.0",
-    "description": "API de gestion d'entrepôts pour StockLink Core. Fournit les opérations CRUD pour les produits, les mouvements de stocks et la cartographie interne des entrepôts."
+    "description": "API de gestion d'entrepôts comem demandé. Fournit les opérations CRUD pour les produits, les mouvements de stocks et la cartographie interne des entrepôts."
   },
   "servers": [
     {
       "url": "http://localhost:3000",
-      "description": "Développement local"
+      "description": "Dév local"
     }
   ],
   "tags": [
