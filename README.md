@@ -34,6 +34,16 @@ npm install
 | `npm start` | Lance la version compilée (`node dist/src/server.js`). |
 | `npm run openapi:build` | Génère `openapi.json` à partir de la configuration Swagger (nécessite `npm run build` si vous lancez la version compilée). |
 
+## Tests
+
+- `npm test` lance la suite Jest (tests d’intégration HTTP via Supertest et tests unitaires des services).
+
+Pour repartir d’un environnement propre et vérifier le projet de bout en bout :
+
+```bash
+rm -rf dist/ node_modules/ && npm install && npm run build && npm run test && npm run openapi:build && npm run start
+```
+
 ## Structure du projet
 
 ```
