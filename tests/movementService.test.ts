@@ -1,15 +1,17 @@
 import { AppError } from "../src/middlewares/errorHandler";
 import { listMovements, createMovement } from "../src/services/movementService";
 
-const poolQueryMock = jest.fn();
-const connectMock = jest.fn();
-
 jest.mock("../src/config/postgres", () => ({
   postgresPool: {
-    query: poolQueryMock,
-    connect: connectMock,
+    query: jest.fn(),
+    connect: jest.fn(),
   },
 }));
+
+import { postgresPool } from "../src/config/postgres";
+
+const poolQueryMock = postgresPool.query as jest.Mock;
+const connectMock = postgresPool.connect as jest.Mock;
 
 describe("movementService", () => {
   beforeEach(() => {

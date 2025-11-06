@@ -1,6 +1,5 @@
-import type { Config } from "jest";
-
-const config: Config = {
+/** @type {import('jest').Config} */
+const config = {
   testEnvironment: "node",
   roots: ["<rootDir>/tests"],
   moduleFileExtensions: ["ts", "js", "json"],
@@ -17,7 +16,7 @@ const config: Config = {
           parser: {
             syntax: "typescript",
           },
-          target: "es2022",
+          target: "es2024",
         },
       },
     ],
@@ -25,4 +24,4 @@ const config: Config = {
   testMatch: ["**/*.test.ts"],
 };
 
-export default config;
+module.exports = config;

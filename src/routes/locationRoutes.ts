@@ -15,31 +15,31 @@ import {
 } from "../controllers/locationController";
 import { asyncHandler } from "../utils/asyncHandler";
 
-const router = Router();
+export const warehouseLocationRouter = Router({ mergeParams: true });
 
-router.get(
-  "/warehouses/:id/locations",
-  authenticate,
+warehouseLocationRouter.use(authenticate);
+
+warehouseLocationRouter.get(
+  "/",
   validateRequest(getWarehouseLocationSchema),
   asyncHandler(getWarehouseLocations),
 );
-router.post(
-  "/warehouses/:id/locations",
-  authenticate,
+warehouseLocationRouter.post(
+  "/",
   validateRequest(createWarehouseLocationSchema),
   asyncHandler(createWarehouseLocations),
 );
-router.put(
-  "/warehouses/:id/locations",
-  authenticate,
+warehouseLocationRouter.put(
+  "/",
   validateRequest(updateWarehouseLocationSchema),
   asyncHandler(updateWarehouseLocations),
 );
-router.get(
-  "/locations/:binCode/exists",
+
+export const locationLookupRouter = Router();
+
+locationLookupRouter.get(
+  "/:binCode/exists",
   authenticate,
   validateRequest(binExistsSchema),
   asyncHandler(getBinExists),
 );
-
-export default router;

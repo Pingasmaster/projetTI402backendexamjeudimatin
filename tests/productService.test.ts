@@ -6,13 +6,15 @@ import {
   deleteProduct,
 } from "../src/services/productService";
 
-const queryMock = jest.fn();
-
 jest.mock("../src/config/postgres", () => ({
   postgresPool: {
-    query: queryMock,
+    query: jest.fn(),
   },
 }));
+
+import { postgresPool } from "../src/config/postgres";
+
+const queryMock = postgresPool.query as jest.Mock;
 
 describe("productService", () => {
   beforeEach(() => {

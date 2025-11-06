@@ -92,6 +92,11 @@ npm run openapi:build
 | Méthode | Endpoint | Description |
 |---------|----------|-------------|
 | POST | `/auth/login` | Obtenir un token JWT. |
+| GET | `/warehouses` | Lister les entrepôts (JWT requis). |
+| GET | `/warehouses/:id` | Consulter un entrepôt donné. |
+| POST | `/warehouses` | Créer un entrepôt. |
+| PUT | `/warehouses/:id` | Mettre à jour un entrepôt. |
+| DELETE | `/warehouses/:id` | Supprimer un entrepôt. |
 | GET | `/products` | Liste des produits (JWT requis). |
 | POST | `/products` | Créer un produit. |
 | PUT | `/products/:id` | Mettre à jour un produit. |

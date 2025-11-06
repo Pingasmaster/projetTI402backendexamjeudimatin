@@ -28,9 +28,17 @@ export const validateRequest =
       query?: typeof req.query;
     };
 
-    req.body = parsed.body ?? req.body;
-    req.params = parsed.params ?? req.params;
-    req.query = parsed.query ?? req.query;
+    if (parsed.body) {
+      req.body = parsed.body;
+    }
+
+    if (parsed.params) {
+      Object.assign(req.params as Record<string, unknown>, parsed.params);
+    }
+
+    if (parsed.query) {
+      Object.assign(req.query as Record<string, unknown>, parsed.query);
+    }
 
     next();
   };

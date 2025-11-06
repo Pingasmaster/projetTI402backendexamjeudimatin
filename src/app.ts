@@ -4,13 +4,17 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import swaggerUi from "swagger-ui-express";
 import { env } from "./config/env";
-import authRoutes from "./routes/authRoutes";
-import productRoutes from "./routes/productRoutes";
-import movementRoutes from "./routes/movementRoutes";
-import locationRoutes from "./routes/locationRoutes";
 import { errorHandler } from "./middlewares/errorHandler";
 import { notFoundHandler } from "./middlewares/notFound";
 import { swaggerSpec } from "./swagger";
+import authRoutes from "./routes/authRoutes";
+import productRoutes from "./routes/productRoutes";
+import movementRoutes from "./routes/movementRoutes";
+import warehouseRoutes from "./routes/warehouseRoutes";
+import {
+  warehouseLocationRouter,
+  locationLookupRouter,
+} from "./routes/locationRoutes";
 
 const app = express();
 
@@ -43,7 +47,9 @@ app.get("/health", (_req, res) => {
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
 app.use("/movements", movementRoutes);
-app.use("/", locationRoutes);
+app.use("/warehouses/:id/locations", warehouseLocationRouter);
+app.use("/locations", locationLookupRouter);
+app.use("/warehouses", warehouseRoutes);
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 

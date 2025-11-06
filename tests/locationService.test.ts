@@ -6,16 +6,18 @@ import {
   binExists,
 } from "../src/services/locationService";
 
-const getMongoDbMock = jest.fn();
+jest.mock("../src/config/mongo", () => ({
+  getMongoDb: jest.fn(),
+}));
+
+import { getMongoDb } from "../src/config/mongo";
+
+const getMongoDbMock = getMongoDb as unknown as jest.Mock;
 const collectionMock = {
   findOne: jest.fn(),
   insertOne: jest.fn(),
   updateOne: jest.fn(),
 };
-
-jest.mock("../src/config/mongo", () => ({
-  getMongoDb: getMongoDbMock,
-}));
 
 describe("locationService", () => {
   beforeEach(() => {

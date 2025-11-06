@@ -82,6 +82,7 @@ const swaggerOptions: Options = {
     ],
     tags: [
       { name: "Auth", description: "Authentification et sécurité" },
+      { name: "Warehouses", description: "Gestion des entrepôts" },
       { name: "Products", description: "Gestion des produits" },
       { name: "Movements", description: "Historique des mouvements de stock" },
       { name: "Locations", description: "Cartographie des entrepôts" },
@@ -160,6 +161,32 @@ const swaggerOptions: Options = {
             type: { type: "string", enum: ["IN", "OUT"] },
             quantity: { type: "integer", example: 25 },
             product_id: { type: "integer", example: 1 },
+          },
+        },
+        Warehouse: {
+          type: "object",
+          required: ["id", "name", "location"],
+          properties: {
+            id: { type: "integer", example: 1 },
+            name: { type: "string", example: "Entrepôt Paris" },
+            location: { type: "string", example: "Paris, France" },
+            created_at: { type: "string", format: "date-time" },
+            updated_at: { type: "string", format: "date-time" },
+          },
+        },
+        NewWarehouse: {
+          type: "object",
+          required: ["name", "location"],
+          properties: {
+            name: { type: "string", example: "Entrepôt Lyon" },
+            location: { type: "string", example: "Lyon, France" },
+          },
+        },
+        UpdateWarehouse: {
+          type: "object",
+          properties: {
+            name: { type: "string", example: "Entrepôt Brest" },
+            location: { type: "string", example: "Brest, France" },
           },
         },
         WarehouseLocation: warehouseLocationSchema,
@@ -349,6 +376,203 @@ const swaggerOptions: Options = {
             204: { description: "Produit supprimé" },
             404: {
               description: "Produit introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/warehouses": {
+        get: {
+          tags: ["Warehouses"],
+          summary: "Lister les entrepôts",
+          security: [{ BearerAuth: [] }],
+          responses: {
+            200: {
+              description: "Liste des entrepôts",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Warehouse" },
+                  },
+                },
+              },
+            },
+            401: {
+              description: "Non autorisé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ["Warehouses"],
+          summary: "Créer un entrepôt",
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/NewWarehouse" },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: "Entrepôt créé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Warehouse" },
+                },
+              },
+            },
+            400: {
+              description: "Données invalides",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            401: {
+              description: "Non autorisé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/warehouses/{id}": {
+        get: {
+          tags: ["Warehouses"],
+          summary: "Récupérer un entrepôt",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          responses: {
+            200: {
+              description: "Entrepôt trouvé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Warehouse" },
+                },
+              },
+            },
+            401: {
+              description: "Non autorisé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            404: {
+              description: "Entrepôt introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+        put: {
+          tags: ["Warehouses"],
+          summary: "Mettre à jour un entrepôt",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/UpdateWarehouse" },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "Entrepôt mis à jour",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Warehouse" },
+                },
+              },
+            },
+            400: {
+              description: "Données invalides",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            401: {
+              description: "Non autorisé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            404: {
+              description: "Entrepôt introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+        delete: {
+          tags: ["Warehouses"],
+          summary: "Supprimer un entrepôt",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          responses: {
+            204: {
+              description: "Entrepôt supprimé",
+            },
+            401: {
+              description: "Non autorisé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            404: {
+              description: "Entrepôt introuvable",
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/Error" },
