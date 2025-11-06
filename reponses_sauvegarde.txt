@@ -1,0 +1,8 @@
+1. Une sauvegarde incrementielle est une sauvegarde qui ne stocke que les modifications éffectuéees depuis la dernière sauvegarde, alors qu'une sauvegarde complète (comme un DUMP;) sauvegarde l'entièretée de la base de donnée, en fait une copie.
+
+2. La fréquence que j'utilise personellement c'est une backup incrémentielle de la DB par jour à 2h du matin pour mes VMs proxmox, et une backup complète par semaine hors site en copie. 
+
+3. pg_dump est un excellent outil sous linux pour sauvegarder une base de donnée PostgreSQL. pg_dumpall marche aussi pour les gens qui veulent faire une sauvegarde complète.
+
+4. La règle numéro 1 est de faire des backups hors sites et sur un autre disque et une autre machine. La stratégie 3-2-1. Ensuite il faut tester ses backups en les restaurant dans une environnement de test, puis s'assurer que les données sont là. Je préfère aussi utiliser un systrme de fichiers comme btrfs qui protège de la corruption en RAID 1 ou RAID 5.
+Il faut aussi avoir un plan de reprise RTO, des procédures en cas d'accident pour ne pas paniquer et restaurer les données rapidement.

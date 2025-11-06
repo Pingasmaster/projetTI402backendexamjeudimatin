@@ -1,0 +1,568 @@
+import swaggerJSDoc, { Options } from "swagger-jsdoc";
+
+const layoutSchema = {
+  type: "array",
+  items: {
+    type: "object",
+    required: ["aisle", "racks"],
+    properties: {
+      aisle: { type: "string", example: "A1" },
+      racks: {
+        type: "array",
+        items: {
+          type: "object",
+          required: ["rack", "levels"],
+          properties: {
+            rack: { type: "string", example: "R1" },
+            levels: {
+              type: "array",
+              items: {
+                type: "object",
+                required: ["level", "bins"],
+                properties: {
+                  level: { type: "integer", example: 1 },
+                  bins: {
+                    type: "array",
+                    items: { type: "string" },
+                    example: ["A1-R1-L1-B01", "A1-R1-L1-B02"],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+const warehouseLocationSchema = {
+  type: "object",
+  required: ["warehouse_id", "code", "layout"],
+  properties: {
+    warehouse_id: { type: "integer", example: 1 },
+    code: { type: "string", example: "WHS-001" },
+    layout: layoutSchema,
+    metadata: {
+      type: "object",
+      additionalProperties: true,
+      example: { tempControlled: true },
+    },
+  },
+};
+
+const newWarehouseLocationSchema = {
+  type: "object",
+  required: ["code", "layout"],
+  properties: {
+    code: { type: "string", example: "WHS-001" },
+    layout: layoutSchema,
+    metadata: {
+      type: "object",
+      additionalProperties: true,
+      example: { tempControlled: true },
+    },
+  },
+};
+
+const swaggerOptions: Options = {
+  definition: {
+    openapi: "3.0.3",
+    info: {
+      title: "StockLink Core API",
+      version: "1.0.0",
+      description:
+        "API de gestion d'entrepôts pour StockLink Core. Fournit les opérations CRUD pour les produits, les mouvements de stocks et la cartographie interne des entrepôts.",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+        description: "Développement local",
+      },
+    ],
+    tags: [
+      { name: "Auth", description: "Authentification et sécurité" },
+      { name: "Products", description: "Gestion des produits" },
+      { name: "Movements", description: "Historique des mouvements de stock" },
+      { name: "Locations", description: "Cartographie des entrepôts" },
+      { name: "System", description: "Surveillance de l'API" },
+    ],
+    components: {
+      securitySchemes: {
+        BearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
+      schemas: {
+        AuthRequest: {
+          type: "object",
+          required: ["email", "password"],
+          properties: {
+            email: { type: "string", format: "email", example: "admin@stocklink.local" },
+            password: { type: "string", example: "admin123" },
+          },
+        },
+        AuthResponse: {
+          type: "object",
+          properties: {
+            access_token: { type: "string", example: "ey..." },
+            token_type: { type: "string", example: "Bearer" },
+            expires_in: { type: "integer", example: 3600 },
+          },
+        },
+        Product: {
+          type: "object",
+          required: ["id", "name", "reference", "quantity", "warehouse_id"],
+          properties: {
+            id: { type: "integer", example: 1 },
+            name: { type: "string", example: "Carton 30x30" },
+            reference: { type: "string", example: "SKU-001" },
+            quantity: { type: "integer", example: 150 },
+            warehouse_id: { type: "integer", example: 1 },
+          },
+        },
+        NewProduct: {
+          type: "object",
+          required: ["name", "reference", "quantity", "warehouse_id"],
+          properties: {
+            name: { type: "string" },
+            reference: { type: "string" },
+            quantity: { type: "integer", minimum: 0 },
+            warehouse_id: { type: "integer", minimum: 1 },
+          },
+        },
+        UpdateProduct: {
+          type: "object",
+          properties: {
+            name: { type: "string" },
+            reference: { type: "string" },
+            quantity: { type: "integer", minimum: 0 },
+            warehouse_id: { type: "integer", minimum: 1 },
+          },
+        },
+        Movement: {
+          type: "object",
+          required: ["id", "type", "quantity", "product_id", "created_at"],
+          properties: {
+            id: { type: "integer", example: 1 },
+            type: { type: "string", enum: ["IN", "OUT"], example: "IN" },
+            quantity: { type: "integer", example: 50 },
+            product_id: { type: "integer", example: 1 },
+            created_at: { type: "string", format: "date-time" },
+          },
+        },
+        NewMovement: {
+          type: "object",
+          required: ["type", "quantity", "product_id"],
+          properties: {
+            type: { type: "string", enum: ["IN", "OUT"] },
+            quantity: { type: "integer", example: 25 },
+            product_id: { type: "integer", example: 1 },
+          },
+        },
+        WarehouseLocation: warehouseLocationSchema,
+        NewWarehouseLocation: newWarehouseLocationSchema,
+        UpdateWarehouseLocation: {
+          type: "object",
+          properties: newWarehouseLocationSchema.properties,
+        },
+        Error: {
+          type: "object",
+          required: ["message"],
+          properties: {
+            message: { type: "string", example: "Erreur détaillée" },
+            details: { type: "string", example: "Informations supplémentaires" },
+            errors: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  path: { type: "string", example: "body.name" },
+                  message: { type: "string", example: "Le nom est requis" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    paths: {
+      "/healthz": {
+        get: {
+          tags: ["System"],
+          summary: "Vérifier l'état de l'API",
+          responses: {
+            200: {
+              description: "API opérationnelle",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      status: { type: "string", example: "ok" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/auth/login": {
+        post: {
+          tags: ["Auth"],
+          summary: "Authentifier un utilisateur",
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/AuthRequest" },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "Authentification réussie",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/AuthResponse" },
+                },
+              },
+            },
+            401: {
+              description: "Identifiants invalides",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/products": {
+        get: {
+          tags: ["Products"],
+          summary: "Lister les produits",
+          security: [{ BearerAuth: [] }],
+          responses: {
+            200: {
+              description: "Liste des produits",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Product" },
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ["Products"],
+          summary: "Créer un produit",
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/NewProduct" },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: "Produit créé",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Product" },
+                },
+              },
+            },
+            400: {
+              description: "Données invalides",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/products/{id}": {
+        put: {
+          tags: ["Products"],
+          summary: "Mettre à jour un produit",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/UpdateProduct" },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "Produit mis à jour",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Product" },
+                },
+              },
+            },
+            404: {
+              description: "Produit introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+        delete: {
+          tags: ["Products"],
+          summary: "Supprimer un produit",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          responses: {
+            204: { description: "Produit supprimé" },
+            404: {
+              description: "Produit introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/warehouses/{id}/locations": {
+        get: {
+          tags: ["Locations"],
+          summary: "Récupérer la structure d'un entrepôt",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          responses: {
+            200: {
+              description: "Configuration retournée",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/WarehouseLocation" },
+                },
+              },
+            },
+            404: {
+              description: "Configuration introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ["Locations"],
+          summary: "Créer la structure interne d'un entrepôt",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/NewWarehouseLocation" },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: "Configuration créée",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/WarehouseLocation" },
+                },
+              },
+            },
+            409: {
+              description: "Configuration déjà existante",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+        put: {
+          tags: ["Locations"],
+          summary: "Mettre à jour la structure interne d'un entrepôt",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "id",
+              in: "path",
+              required: true,
+              schema: { type: "integer" },
+            },
+          ],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/UpdateWarehouseLocation" },
+              },
+            },
+          },
+          responses: {
+            200: {
+              description: "Configuration mise à jour",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/WarehouseLocation" },
+                },
+              },
+            },
+            404: {
+              description: "Configuration introuvable",
+              content: {
+                  "application/json": {
+                    schema: { $ref: "#/components/schemas/Error" },
+                  },
+              },
+            },
+          },
+        },
+      },
+      "/locations/{binCode}/exists": {
+        get: {
+          tags: ["Locations"],
+          summary: "Vérifier l'existence d'un bac",
+          security: [{ BearerAuth: [] }],
+          parameters: [
+            {
+              name: "binCode",
+              in: "path",
+              required: true,
+              schema: { type: "string" },
+              description: "Code complet du bac (ex: A1-R1-L2-B03)",
+            },
+          ],
+          responses: {
+            200: {
+              description: "Résultat de la vérification",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      binCode: { type: "string", example: "A1-R1-L2-B03" },
+                      exists: { type: "boolean", example: true },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/movements": {
+        get: {
+          tags: ["Movements"],
+          summary: "Lister les mouvements de stock",
+          security: [{ BearerAuth: [] }],
+          responses: {
+            200: {
+              description: "Liste des mouvements",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Movement" },
+                  },
+                },
+              },
+            },
+          },
+        },
+        post: {
+          tags: ["Movements"],
+          summary: "Créer un mouvement de stock",
+          security: [{ BearerAuth: [] }],
+          requestBody: {
+            required: true,
+            content: {
+              "application/json": {
+                schema: { $ref: "#/components/schemas/NewMovement" },
+              },
+            },
+          },
+          responses: {
+            201: {
+              description: "Mouvement enregistré",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Movement" },
+                },
+              },
+            },
+            400: {
+              description: "Données invalides ou stock insuffisant",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+            404: {
+              description: "Produit introuvable",
+              content: {
+                "application/json": {
+                  schema: { $ref: "#/components/schemas/Error" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  apis: [],
+};
+
+export const swaggerSpec = swaggerJSDoc(swaggerOptions);
