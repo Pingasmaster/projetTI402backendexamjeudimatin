@@ -52,8 +52,7 @@ Ensuite on peut naviguer vers http://localhost:`PORT`/docs pour voir la document
 
 ```
 stocklink-core/
-├── db/
-│   └── migrations/        # Scripts SQL (PostgreSQL)
+├── init_db.sql            # Script SQL PostgreSQL
 ├── scripts/
 │   └── generate-openapi.ts
 ├── src/
@@ -77,10 +76,8 @@ stocklink-core/
 
 ## Base de données
 
-- **PostgreSQL** : tables `warehouses`, `products`, `movements` (scripts SQL dans `db/migrations/001_init.sql`).
+- **PostgreSQL** : tables `warehouses`, `products`, `movements` (script SQL dans `init_db.sql`).
 - **MongoDB** : collection `locations` décrivant la disposition interne des entrepôts.
-
-Exécutez les migrations SQL via votre outil habituel. La collection MongoDB est créée dynamiquement.
 
 ## Sécurité
 

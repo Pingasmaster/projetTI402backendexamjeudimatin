@@ -1,40 +1,40 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Stocklink API",
+    "title": "API Stocklink core",
     "version": "1.0.0",
-    "description": "API de gestion d'entrepôts comem demandé. Fournit les opérations CRUD pour les produits, les mouvements de stocks et la cartographie interne des entrepôts."
+    "description": ""
   },
   "servers": [
     {
       "url": "http://localhost:3000",
-      "description": "Dév local"
+      "description": "dev local"
     }
   ],
   "tags": [
     {
       "name": "Auth",
-      "description": "Authentification et sécurité"
+      "description": "Auth JWT et sécu"
     },
     {
       "name": "Warehouses",
-      "description": "Gestion des entrepôts"
+      "description": "Entrepôts"
     },
     {
       "name": "Products",
-      "description": "Gestion des produits"
+      "description": "Produits"
     },
     {
       "name": "Movements",
-      "description": "Historique des mouvements de stock"
+      "description": "Historique du stock"
     },
     {
       "name": "Locations",
-      "description": "Cartographie des entrepôts"
+      "description": "Cartographie entrepôt"
     },
     {
       "name": "System",
-      "description": "Surveillance de l'API"
+      "description": "Coeur de l'api"
     }
   ],
   "components": {
@@ -56,11 +56,11 @@
           "email": {
             "type": "string",
             "format": "email",
-            "example": "admin@stocklink.local"
+            "example": "adrian.noyes@efrei.net"
           },
           "password": {
             "type": "string",
-            "example": "admin123"
+            "example": "changeme"
           }
         }
       },
@@ -69,11 +69,11 @@
         "properties": {
           "access_token": {
             "type": "string",
-            "example": "ey..."
+            "example": "eB..."
           },
           "token_type": {
             "type": "string",
-            "example": "Bearer"
+            "example": "Porteur"
           },
           "expires_in": {
             "type": "integer",
@@ -105,11 +105,11 @@
           },
           "quantity": {
             "type": "integer",
-            "example": 150
+            "example": 430
           },
           "warehouse_id": {
             "type": "integer",
-            "example": 1
+            "example": 5
           }
         }
       },
@@ -181,11 +181,11 @@
           },
           "quantity": {
             "type": "integer",
-            "example": 50
+            "example": 629
           },
           "product_id": {
             "type": "integer",
-            "example": 1
+            "example": 56
           },
           "created_at": {
             "type": "string",
@@ -210,11 +210,11 @@
           },
           "quantity": {
             "type": "integer",
-            "example": 25
+            "example": 378
           },
           "product_id": {
             "type": "integer",
-            "example": 1
+            "example": 56
           }
         }
       },
@@ -232,11 +232,11 @@
           },
           "name": {
             "type": "string",
-            "example": "Entrepôt Paris"
+            "example": "Entrepôt Stocklink Paris"
           },
           "location": {
             "type": "string",
-            "example": "Paris, France"
+            "example": "Paris"
           },
           "created_at": {
             "type": "string",
@@ -257,11 +257,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "Entrepôt Lyon"
+            "example": "Entrepôt Stocklink Lyon"
           },
           "location": {
             "type": "string",
-            "example": "Lyon, France"
+            "example": "Lyon"
           }
         }
       },
@@ -270,11 +270,11 @@
         "properties": {
           "name": {
             "type": "string",
-            "example": "Entrepôt Brest"
+            "example": "Entrepôt Stocklink Brest"
           },
           "location": {
             "type": "string",
-            "example": "Brest, France"
+            "example": "Brest"
           }
         }
       },
@@ -521,11 +521,11 @@
         "properties": {
           "message": {
             "type": "string",
-            "example": "Erreur détaillée"
+            "example": "Erreur"
           },
           "details": {
             "type": "string",
-            "example": "Informations supplémentaires"
+            "example": "Infos sup"
           },
           "errors": {
             "type": "array",
@@ -538,7 +538,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "Le nom est requis"
+                  "example": "Nom requis"
                 }
               }
             }
@@ -553,7 +553,7 @@
         "tags": [
           "System"
         ],
-        "summary": "Vérifier l'état de l'API",
+        "summary": "Page de vérif santé api",
         "responses": {
           "200": {
             "description": "API opérationnelle",
@@ -579,7 +579,7 @@
         "tags": [
           "Auth"
         ],
-        "summary": "Authentifier un utilisateur",
+        "summary": "Authentification des utilisateurs stocklink",
         "requestBody": {
           "required": true,
           "content": {
@@ -1064,7 +1064,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Configuration retournée",
+            "description": "Configuration OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -1089,7 +1089,7 @@
         "tags": [
           "Locations"
         ],
-        "summary": "Créer la structure interne d'un entrepôt",
+        "summary": "Création de la structure interne d'un entrepôt",
         "security": [
           {
             "BearerAuth": []
@@ -1142,7 +1142,7 @@
         "tags": [
           "Locations"
         ],
-        "summary": "Mettre à jour la structure interne d'un entrepôt",
+        "summary": "Mettre à jour la structure d'un entrepôt",
         "security": [
           {
             "BearerAuth": []
@@ -1211,7 +1211,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "Code complet du bac (ex: A1-R1-L2-B03)"
+            "description": "Code complet du bac (genre A1-R1-L2-B03)"
           }
         ],
         "responses": {

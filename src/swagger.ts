@@ -69,24 +69,24 @@ const swaggerOptions: Options = {
   definition: {
     openapi: "3.0.3",
     info: {
-      title: "StockLink Core API",
+      title: "API Stocklink core",
       version: "1.0.0",
       description:
-        "API de gestion d'entrepôts pour StockLink Core. Fournit les opérations CRUD pour les produits, les mouvements de stocks et la cartographie interne des entrepôts.",
+        "",
     },
     servers: [
       {
         url: "http://localhost:3000",
-        description: "Développement local",
+        description: "dev local",
       },
     ],
     tags: [
-      { name: "Auth", description: "Authentification et sécurité" },
-      { name: "Warehouses", description: "Gestion des entrepôts" },
-      { name: "Products", description: "Gestion des produits" },
-      { name: "Movements", description: "Historique des mouvements de stock" },
-      { name: "Locations", description: "Cartographie des entrepôts" },
-      { name: "System", description: "Surveillance de l'API" },
+      { name: "Auth", description: "Auth JWT et sécu" },
+      { name: "Warehouses", description: "Entrepôts" },
+      { name: "Products", description: "Produits" },
+      { name: "Movements", description: "Historique du stock" },
+      { name: "Locations", description: "Cartographie entrepôt" },
+      { name: "System", description: "Coeur de l'api" },
     ],
     components: {
       securitySchemes: {
@@ -101,15 +101,15 @@ const swaggerOptions: Options = {
           type: "object",
           required: ["email", "password"],
           properties: {
-            email: { type: "string", format: "email", example: "admin@stocklink.local" },
-            password: { type: "string", example: "admin123" },
+            email: { type: "string", format: "email", example: "adrian.noyes@efrei.net" },
+            password: { type: "string", example: "changeme" },
           },
         },
         AuthResponse: {
           type: "object",
           properties: {
-            access_token: { type: "string", example: "ey..." },
-            token_type: { type: "string", example: "Bearer" },
+            access_token: { type: "string", example: "eB..." },
+            token_type: { type: "string", example: "Porteur" },
             expires_in: { type: "integer", example: 3600 },
           },
         },
@@ -120,8 +120,8 @@ const swaggerOptions: Options = {
             id: { type: "integer", example: 1 },
             name: { type: "string", example: "Carton 30x30" },
             reference: { type: "string", example: "SKU-001" },
-            quantity: { type: "integer", example: 150 },
-            warehouse_id: { type: "integer", example: 1 },
+            quantity: { type: "integer", example: 430 },
+            warehouse_id: { type: "integer", example: 5 },
           },
         },
         NewProduct: {
@@ -149,8 +149,8 @@ const swaggerOptions: Options = {
           properties: {
             id: { type: "integer", example: 1 },
             type: { type: "string", enum: ["IN", "OUT"], example: "IN" },
-            quantity: { type: "integer", example: 50 },
-            product_id: { type: "integer", example: 1 },
+            quantity: { type: "integer", example: 629 },
+            product_id: { type: "integer", example: 56 },
             created_at: { type: "string", format: "date-time" },
           },
         },
@@ -159,8 +159,8 @@ const swaggerOptions: Options = {
           required: ["type", "quantity", "product_id"],
           properties: {
             type: { type: "string", enum: ["IN", "OUT"] },
-            quantity: { type: "integer", example: 25 },
-            product_id: { type: "integer", example: 1 },
+            quantity: { type: "integer", example: 378 },
+            product_id: { type: "integer", example: 56 },
           },
         },
         Warehouse: {
@@ -168,8 +168,8 @@ const swaggerOptions: Options = {
           required: ["id", "name", "location"],
           properties: {
             id: { type: "integer", example: 1 },
-            name: { type: "string", example: "Entrepôt Paris" },
-            location: { type: "string", example: "Paris, France" },
+            name: { type: "string", example: "Entrepôt Stocklink Paris" },
+            location: { type: "string", example: "Paris" },
             created_at: { type: "string", format: "date-time" },
             updated_at: { type: "string", format: "date-time" },
           },
@@ -178,15 +178,16 @@ const swaggerOptions: Options = {
           type: "object",
           required: ["name", "location"],
           properties: {
-            name: { type: "string", example: "Entrepôt Lyon" },
-            location: { type: "string", example: "Lyon, France" },
+            name: { type: "string", example: "Entrepôt Stocklink Lyon" },
+
+            location: { type: "string", example: "Lyon" },
           },
         },
         UpdateWarehouse: {
           type: "object",
           properties: {
-            name: { type: "string", example: "Entrepôt Brest" },
-            location: { type: "string", example: "Brest, France" },
+            name: { type: "string", example: "Entrepôt Stocklink Brest" },
+            location: { type: "string", example: "Brest" },
           },
         },
         WarehouseLocation: warehouseLocationSchema,
@@ -199,15 +200,15 @@ const swaggerOptions: Options = {
           type: "object",
           required: ["message"],
           properties: {
-            message: { type: "string", example: "Erreur détaillée" },
-            details: { type: "string", example: "Informations supplémentaires" },
+            message: { type: "string", example: "Erreur" },
+            details: { type: "string", example: "Infos sup" },
             errors: {
               type: "array",
               items: {
                 type: "object",
                 properties: {
                   path: { type: "string", example: "body.name" },
-                  message: { type: "string", example: "Le nom est requis" },
+                  message: { type: "string", example: "Nom requis" },
                 },
               },
             },
@@ -219,7 +220,7 @@ const swaggerOptions: Options = {
       "/health": {
         get: {
           tags: ["System"],
-          summary: "Vérifier l'état de l'API",
+          summary: "Page de vérif santé api",
           responses: {
             200: {
               description: "API opérationnelle",
@@ -240,7 +241,7 @@ const swaggerOptions: Options = {
       "/auth/login": {
         post: {
           tags: ["Auth"],
-          summary: "Authentifier un utilisateur",
+          summary: "Authentification des utilisateurs stocklink",
           requestBody: {
             required: true,
             content: {
@@ -597,7 +598,7 @@ const swaggerOptions: Options = {
           ],
           responses: {
             200: {
-              description: "Configuration retournée",
+              description: "Configuration OK",
               content: {
                 "application/json": {
                   schema: { $ref: "#/components/schemas/WarehouseLocation" },
@@ -616,7 +617,7 @@ const swaggerOptions: Options = {
         },
         post: {
           tags: ["Locations"],
-          summary: "Créer la structure interne d'un entrepôt",
+          summary: "Création de la structure interne d'un entrepôt",
           security: [{ BearerAuth: [] }],
           parameters: [
             {
@@ -655,7 +656,7 @@ const swaggerOptions: Options = {
         },
         put: {
           tags: ["Locations"],
-          summary: "Mettre à jour la structure interne d'un entrepôt",
+          summary: "Mettre à jour la structure d'un entrepôt",
           security: [{ BearerAuth: [] }],
           parameters: [
             {
@@ -704,7 +705,7 @@ const swaggerOptions: Options = {
               in: "path",
               required: true,
               schema: { type: "string" },
-              description: "Code complet du bac (ex: A1-R1-L2-B03)",
+              description: "Code complet du bac (genre A1-R1-L2-B03)",
             },
           ],
           responses: {

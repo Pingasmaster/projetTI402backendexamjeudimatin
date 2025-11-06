@@ -1,17 +1,17 @@
 {
   "name": "stocklink-core",
-  "version": "1.0.0",
-  "description": "",
+  "version": "1.1.0",
+  "description": "L'API stocklink demandée.",
   "main": "index.js",
   "scripts": {
     "dev": "ts-node src/server.ts",
     "build": "tsc",
     "start": "node dist/src/server.js",
     "openapi:build": "ts-node scripts/generate-openapi.ts",
-    "test": "jest"
+    "test": "node --require ts-node/register ./node_modules/jest/bin/jest.js --config jest-conf.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Adrian NOYES",
   "license": "GPL-3.0-only",
   "type": "commonjs",
   "dependencies": {
