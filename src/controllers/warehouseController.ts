@@ -1,36 +1,40 @@
 import { Request, Response } from "express";
 import {
-  createWarehouse,
-  deleteWarehouse,
-  getWarehouse,
-  listWarehouses,
-  updateWarehouse,
-} from "../services/warehouseService";
+  WarehouseCreateProps,
+  WarehouseUpdateProps,
+} from "../models/warehouse";
+import { WarehouseService } from "../services/warehouseService";
 
-export const getWarehouses = async (_req: Request, res: Response) => {
-  const warehouses = await listWarehouses();
-  res.json(warehouses);
-};
+export class WarehouseController {
+  constructor(private readonly service: WarehouseService) {}
 
-export const getWarehouseById = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const warehouse = await getWarehouse(id);
-  res.json(warehouse);
-};
+  public readonly getWarehouses = async (_req: Request, res: Response) => {
+    const warehouses = await this.service.listWarehouses();
+    res.json(warehouses.map((warehouse) => warehouse.toJSON()));
+  };
 
-export const postWarehouse = async (req: Request, res: Response) => {
-  const warehouse = await createWarehouse(req.body);
-  res.status(201).json(warehouse);
-};
+  public readonly getWarehouseById = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const warehouse = await this.service.getWarehouse(id);
+    res.json(warehouse.toJSON());
+  };
 
-export const putWarehouse = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const updated = await updateWarehouse(id, req.body);
-  res.json(updated);
-};
+  public readonly postWarehouse = async (req: Request, res: Response) => {
+    const payload = req.body as WarehouseCreateProps;
+    const warehouse = await this.service.createWarehouse(payload);
+    res.status(201).json(warehouse.toJSON());
+  };
 
-export const removeWarehouse = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  await deleteWarehouse(id);
-  res.status(204).send();
-};
+  public readonly putWarehouse = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const updates = req.body as WarehouseUpdateProps;
+    const updated = await this.service.updateWarehouse(id, updates);
+    res.json(updated.toJSON());
+  };
+
+  public readonly removeWarehouse = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    await this.service.deleteWarehouse(id);
+    res.status(204).send();
+  };
+}

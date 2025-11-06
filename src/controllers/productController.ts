@@ -1,30 +1,39 @@
 import { Request, Response } from "express";
 import {
-  listProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "../services/productService";
+  ProductCreateProps,
+  ProductUpdateProps,
+} from "../models/product";
+import { ProductService } from "../services/productService";
 
-export const getProducts = async (_req: Request, res: Response) => {
-  const products = await listProducts();
-  res.json(products);
-};
+export class ProductController {
+  constructor(private readonly service: ProductService) {}
 
-export const postProduct = async (req: Request, res: Response) => {
-  const { name, reference, quantity, warehouse_id } = req.body;
-  const product = await createProduct({ name, reference, quantity, warehouse_id });
-  res.status(201).json(product);
-};
+  public readonly getProducts = async (_req: Request, res: Response) => {
+    const products = await this.service.listProducts();
+    res.json(products.map((product) => product.toJSON()));
+  };
 
-export const putProduct = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const updated = await updateProduct(id, req.body);
-  res.json(updated);
-};
+  public readonly postProduct = async (req: Request, res: Response) => {
+    const { name, reference, quantity, warehouse_id } = req.body as ProductCreateProps;
+    const product = await this.service.createProduct({
+      name,
+      reference,
+      quantity,
+      warehouse_id,
+    });
+    res.status(201).json(product.toJSON());
+  };
 
-export const removeProduct = async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  await deleteProduct(id);
-  res.status(204).send();
-};
+  public readonly putProduct = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    const updates = req.body as ProductUpdateProps;
+    const updated = await this.service.updateProduct(id, updates);
+    res.json(updated.toJSON());
+  };
+
+  public readonly removeProduct = async (req: Request, res: Response) => {
+    const id = Number(req.params.id);
+    await this.service.deleteProduct(id);
+    res.status(204).send();
+  };
+}

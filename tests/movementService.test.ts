@@ -1,5 +1,5 @@
 import { AppError } from "../src/middlewares/errorHandler";
-import { listMovements, createMovement } from "../src/services/movementService";
+import { MovementService } from "../src/services/movementService";
 
 jest.mock("../src/config/postgres", () => ({
   postgresPool: {
@@ -12,11 +12,13 @@ import { postgresPool } from "../src/config/postgres";
 
 const poolQueryMock = postgresPool.query as jest.Mock;
 const connectMock = postgresPool.connect as jest.Mock;
+let service: MovementService;
 
 describe("movementService", () => {
   beforeEach(() => {
     poolQueryMock.mockReset();
     connectMock.mockReset();
+    service = new MovementService(postgresPool as unknown as any);
   });
 
   it("retrieves movements ordered by creation date", async () => {
@@ -32,7 +34,7 @@ describe("movementService", () => {
       ],
     });
 
-    const movements = await listMovements();
+    const movements = await service.listMovements();
 
     expect(movements).toHaveLength(1);
     expect(poolQueryMock).toHaveBeenCalledWith(
@@ -69,7 +71,7 @@ describe("movementService", () => {
       }) // INSERT
       .mockResolvedValueOnce(undefined); // COMMIT
 
-    const movement = await createMovement({
+    const movement = await service.createMovement({
       type: "IN",
       quantity: 5,
       product_id: 5,
@@ -101,7 +103,7 @@ describe("movementService", () => {
       .mockResolvedValue(undefined); // ROLLBACK (default)
 
     await expect(
-      createMovement({
+      service.createMovement({
         type: "OUT",
         quantity: 5,
         product_id: 2,
@@ -129,7 +131,7 @@ describe("movementService", () => {
       .mockResolvedValue(undefined); // ROLLBACK
 
     await expect(
-      createMovement({
+      service.createMovement({
         type: "IN",
         quantity: 5,
         product_id: 999,

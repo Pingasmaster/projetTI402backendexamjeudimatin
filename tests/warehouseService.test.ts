@@ -1,11 +1,5 @@
 import { AppError } from "../src/middlewares/errorHandler";
-import {
-  listWarehouses,
-  getWarehouse,
-  createWarehouse,
-  updateWarehouse,
-  deleteWarehouse,
-} from "../src/services/warehouseService";
+import { WarehouseService } from "../src/services/warehouseService";
 
 jest.mock("../src/config/postgres", () => ({
   postgresPool: {
@@ -16,10 +10,12 @@ jest.mock("../src/config/postgres", () => ({
 import { postgresPool } from "../src/config/postgres";
 
 const queryMock = postgresPool.query as jest.Mock;
+let service: WarehouseService;
 
 describe("warehouseService", () => {
   beforeEach(() => {
     queryMock.mockReset();
+    service = new WarehouseService(postgresPool as unknown as any);
   });
 
   it("lists warehouses ordered by id", async () => {
@@ -30,7 +26,7 @@ describe("warehouseService", () => {
       ],
     });
 
-    const warehouses = await listWarehouses();
+    const warehouses = await service.listWarehouses();
     expect(warehouses).toHaveLength(2);
     expect(queryMock).toHaveBeenCalledWith(
       "SELECT * FROM warehouses ORDER BY id ASC",
@@ -43,7 +39,7 @@ describe("warehouseService", () => {
       rows: [{ id: 5, name: "Entrepôt Lille", location: "Lille" }],
     });
 
-    const warehouse = await getWarehouse(5);
+    const warehouse = await service.getWarehouse(5);
     expect(warehouse.id).toBe(5);
     expect(queryMock).toHaveBeenCalledWith(
       "SELECT * FROM warehouses WHERE id = $1",
@@ -57,7 +53,7 @@ describe("warehouseService", () => {
       rows: [],
     });
 
-    await expect(getWarehouse(999)).rejects.toThrow(AppError);
+    await expect(service.getWarehouse(999)).rejects.toThrow(AppError);
   });
 
   it("creates a warehouse", async () => {
@@ -65,7 +61,7 @@ describe("warehouseService", () => {
       rows: [{ id: 10, name: "Entrepôt Marseille", location: "Marseille" }],
     });
 
-    const warehouse = await createWarehouse({
+    const warehouse = await service.createWarehouse({
       name: "Entrepôt Marseille",
       location: "Marseille",
     });
@@ -83,7 +79,7 @@ describe("warehouseService", () => {
       rows: [{ id: 3, name: "Entrepôt Brest", location: "Brest" }],
     });
 
-    const updated = await updateWarehouse(3, { location: "Brest" });
+    const updated = await service.updateWarehouse(3, { location: "Brest" });
     expect(updated.location).toBe("Brest");
     expect(queryMock).toHaveBeenCalledWith(
       expect.stringContaining("UPDATE warehouses"),
@@ -97,7 +93,7 @@ describe("warehouseService", () => {
       rows: [{ id: 4, name: "Entrepôt Nice", location: "Nice" }],
     });
 
-    const warehouse = await updateWarehouse(4, {});
+    const warehouse = await service.updateWarehouse(4, {});
     expect(warehouse.id).toBe(4);
     expect(queryMock).toHaveBeenCalledWith(
       "SELECT * FROM warehouses WHERE id = $1",
@@ -111,7 +107,9 @@ describe("warehouseService", () => {
       rows: [],
     });
 
-    await expect(updateWarehouse(999, { name: "Ghost" })).rejects.toThrow(AppError);
+    await expect(
+      service.updateWarehouse(999, { name: "Ghost" }),
+    ).rejects.toThrow(AppError);
   });
 
   it("deletes a warehouse", async () => {
@@ -119,7 +117,7 @@ describe("warehouseService", () => {
       rowCount: 1,
     });
 
-    await deleteWarehouse(2);
+    await service.deleteWarehouse(2);
     expect(queryMock).toHaveBeenCalledWith("DELETE FROM warehouses WHERE id = $1", [2]);
   });
 
@@ -128,6 +126,6 @@ describe("warehouseService", () => {
       rowCount: 0,
     });
 
-    await expect(deleteWarehouse(999)).rejects.toThrow(AppError);
-  });
+    await expect(service.deleteWarehouse(999)).rejects.toThrow(AppError);
+});
 });

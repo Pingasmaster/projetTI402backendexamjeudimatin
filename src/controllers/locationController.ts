@@ -1,38 +1,49 @@
 import { Request, Response } from "express";
 import {
-  binExists,
-  createWarehouseLocation,
-  getWarehouseLocation,
-  updateWarehouseLocation,
-} from "../services/locationService";
+  WarehouseLocationCreateProps,
+  WarehouseLocationUpdateProps,
+} from "../models/location";
+import { LocationService } from "../services/locationService";
 
-export const getWarehouseLocations = async (req: Request, res: Response) => {
-  const warehouseId = Number(req.params.id);
-  const location = await getWarehouseLocation(warehouseId);
+export class LocationController {
+  constructor(private readonly service: LocationService) {}
 
-  if (!location) {
-    return res.status(404).json({
-      message: "Configuration introuvable pour cet entrepôt",
-    });
-  }
+  public readonly getWarehouseLocations = async (req: Request, res: Response) => {
+    const warehouseId = Number(req.params.id);
+    const location = await this.service.getWarehouseLocation(warehouseId);
 
-  res.json(location);
-};
+    if (!location) {
+      return res.status(404).json({
+        message: "Configuration introuvable pour cet entrepôt",
+      });
+    }
 
-export const createWarehouseLocations = async (req: Request, res: Response) => {
-  const warehouseId = Number(req.params.id);
-  const created = await createWarehouseLocation(warehouseId, req.body);
-  res.status(201).json(created);
-};
+    res.json(location.toJSON());
+  };
 
-export const updateWarehouseLocations = async (req: Request, res: Response) => {
-  const warehouseId = Number(req.params.id);
-  const updated = await updateWarehouseLocation(warehouseId, req.body);
-  res.json(updated);
-};
+  public readonly createWarehouseLocations = async (
+    req: Request,
+    res: Response,
+  ) => {
+    const warehouseId = Number(req.params.id);
+    const payload = req.body as WarehouseLocationCreateProps;
+    const created = await this.service.createWarehouseLocation(warehouseId, payload);
+    res.status(201).json(created.toJSON());
+  };
 
-export const getBinExists = async (req: Request, res: Response) => {
-  const { binCode } = req.params;
-  const exists = await binExists(binCode);
-  res.json({ binCode, exists });
-};
+  public readonly updateWarehouseLocations = async (
+    req: Request,
+    res: Response,
+  ) => {
+    const warehouseId = Number(req.params.id);
+    const updates = req.body as WarehouseLocationUpdateProps;
+    const updated = await this.service.updateWarehouseLocation(warehouseId, updates);
+    res.json(updated.toJSON());
+  };
+
+  public readonly getBinExists = async (req: Request, res: Response) => {
+    const { binCode } = req.params;
+    const exists = await this.service.binExists(binCode);
+    res.json({ binCode, exists });
+  };
+}

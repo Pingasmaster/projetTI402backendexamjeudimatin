@@ -1,10 +1,5 @@
 import { AppError } from "../src/middlewares/errorHandler";
-import {
-  getWarehouseLocation,
-  createWarehouseLocation,
-  updateWarehouseLocation,
-  binExists,
-} from "../src/services/locationService";
+import { LocationService } from "../src/services/locationService";
 
 jest.mock("../src/config/mongo", () => ({
   getMongoDb: jest.fn(),
@@ -18,6 +13,7 @@ const collectionMock = {
   insertOne: jest.fn(),
   updateOne: jest.fn(),
 };
+let service: LocationService;
 
 describe("locationService", () => {
   beforeEach(() => {
@@ -29,6 +25,8 @@ describe("locationService", () => {
     getMongoDbMock.mockResolvedValue({
       collection: () => collectionMock,
     });
+
+    service = new LocationService(getMongoDb as unknown as any);
   });
 
   it("fetches a warehouse configuration", async () => {
@@ -38,7 +36,7 @@ describe("locationService", () => {
       layout: [],
     });
 
-    const location = await getWarehouseLocation(1);
+    const location = await service.getWarehouseLocation(1);
 
     expect(location?.code).toBe("WHS-001");
     expect(collectionMock.findOne).toHaveBeenCalledWith({ warehouse_id: 1 });
@@ -56,7 +54,7 @@ describe("locationService", () => {
       metadata: { tempControlled: true },
     };
 
-    const created = await createWarehouseLocation(1, payload);
+    const created = await service.createWarehouseLocation(1, payload);
 
     expect(created.code).toBe("WHS-001");
     expect(collectionMock.insertOne).toHaveBeenCalledWith({
@@ -73,7 +71,7 @@ describe("locationService", () => {
     });
 
     await expect(
-      createWarehouseLocation(1, { code: "WHS-001", layout: [] }),
+      service.createWarehouseLocation(1, { code: "WHS-001", layout: [] }),
     ).rejects.toThrow(AppError);
   });
 
@@ -94,7 +92,7 @@ describe("locationService", () => {
 
     collectionMock.updateOne.mockResolvedValue({ matchedCount: 1, modifiedCount: 1 });
 
-    const updated = await updateWarehouseLocation(1, {
+    const updated = await service.updateWarehouseLocation(1, {
       metadata: { tempControlled: false },
     });
 
@@ -109,7 +107,7 @@ describe("locationService", () => {
     collectionMock.findOne.mockResolvedValueOnce(null);
 
     await expect(
-      updateWarehouseLocation(99, { metadata: { tempControlled: true } }),
+      service.updateWarehouseLocation(99, { metadata: { tempControlled: true } }),
     ).rejects.toThrow(AppError);
   });
 
@@ -119,7 +117,7 @@ describe("locationService", () => {
       code: "WHS-001",
     });
 
-    const exists = await binExists("A1-R1-L1-B01");
+    const exists = await service.binExists("A1-R1-L1-B01");
 
     expect(exists).toBe(true);
     expect(collectionMock.findOne).toHaveBeenCalledWith({

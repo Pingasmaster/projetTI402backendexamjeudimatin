@@ -7,39 +7,35 @@ import {
   getWarehouseSchema,
   updateWarehouseSchema,
 } from "../schemas/warehouseSchemas";
-import {
-  getWarehouses,
-  getWarehouseById,
-  postWarehouse,
-  putWarehouse,
-  removeWarehouse,
-} from "../controllers/warehouseController";
 import { asyncHandler } from "../utils/asyncHandler";
+import { WarehouseController } from "../controllers/warehouseController";
+import { WarehouseService } from "../services/warehouseService";
 
 const router = Router();
+const warehouseController = new WarehouseController(new WarehouseService());
 
 router.use(authenticate);
 
-router.get("/", asyncHandler(getWarehouses));
+router.get("/", asyncHandler(warehouseController.getWarehouses));
 router.get(
   "/:id",
   validateRequest(getWarehouseSchema),
-  asyncHandler(getWarehouseById),
+  asyncHandler(warehouseController.getWarehouseById),
 );
 router.post(
   "/",
   validateRequest(createWarehouseSchema),
-  asyncHandler(postWarehouse),
+  asyncHandler(warehouseController.postWarehouse),
 );
 router.put(
   "/:id",
   validateRequest(updateWarehouseSchema),
-  asyncHandler(putWarehouse),
+  asyncHandler(warehouseController.putWarehouse),
 );
 router.delete(
   "/:id",
   validateRequest(deleteWarehouseSchema),
-  asyncHandler(removeWarehouse),
+  asyncHandler(warehouseController.removeWarehouse),
 );
 
 export default router;

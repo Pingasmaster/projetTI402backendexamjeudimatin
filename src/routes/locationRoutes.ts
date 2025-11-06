@@ -7,32 +7,29 @@ import {
   getWarehouseLocationSchema,
   updateWarehouseLocationSchema,
 } from "../schemas/locationSchemas";
-import {
-  createWarehouseLocations,
-  getBinExists,
-  getWarehouseLocations,
-  updateWarehouseLocations,
-} from "../controllers/locationController";
 import { asyncHandler } from "../utils/asyncHandler";
+import { LocationController } from "../controllers/locationController";
+import { LocationService } from "../services/locationService";
 
 export const warehouseLocationRouter = Router({ mergeParams: true });
+const locationController = new LocationController(new LocationService());
 
 warehouseLocationRouter.use(authenticate);
 
 warehouseLocationRouter.get(
   "/",
   validateRequest(getWarehouseLocationSchema),
-  asyncHandler(getWarehouseLocations),
+  asyncHandler(locationController.getWarehouseLocations),
 );
 warehouseLocationRouter.post(
   "/",
   validateRequest(createWarehouseLocationSchema),
-  asyncHandler(createWarehouseLocations),
+  asyncHandler(locationController.createWarehouseLocations),
 );
 warehouseLocationRouter.put(
   "/",
   validateRequest(updateWarehouseLocationSchema),
-  asyncHandler(updateWarehouseLocations),
+  asyncHandler(locationController.updateWarehouseLocations),
 );
 
 export const locationLookupRouter = Router();
@@ -41,5 +38,5 @@ locationLookupRouter.get(
   "/:binCode/exists",
   authenticate,
   validateRequest(binExistsSchema),
-  asyncHandler(getBinExists),
+  asyncHandler(locationController.getBinExists),
 );

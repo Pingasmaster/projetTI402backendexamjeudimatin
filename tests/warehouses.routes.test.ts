@@ -1,12 +1,9 @@
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";
-import * as warehouseService from "../src/services/warehouseService";
+import { WarehouseService } from "../src/services/warehouseService";
+import { Warehouse } from "../src/models/warehouse";
 import { AppError } from "../src/middlewares/errorHandler";
-
-jest.mock("../src/services/warehouseService");
-
-const mockedWarehouseService = warehouseService as jest.Mocked<typeof warehouseService>;
 
 const authHeader = () =>
   `Bearer ${signToken({
@@ -16,26 +13,29 @@ const authHeader = () =>
   })}`;
 
 describe("Warehouse routes", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("requires authentication", async () => {
+    const listSpy = jest.spyOn(WarehouseService.prototype, "listWarehouses");
     const response = await request(app).get("/warehouses");
 
     expect(response.status).toBe(401);
-    expect(mockedWarehouseService.listWarehouses).not.toHaveBeenCalled();
+    expect(listSpy).not.toHaveBeenCalled();
   });
 
   it("lists warehouses", async () => {
-    mockedWarehouseService.listWarehouses.mockResolvedValue([
-      {
+    const listSpy = jest
+      .spyOn(WarehouseService.prototype, "listWarehouses")
+      .mockResolvedValue([
+        Warehouse.fromDatabase({
         id: 1,
         name: "Entrepôt Paris",
         location: "Paris",
         created_at: undefined,
         updated_at: undefined,
-      },
+        }),
     ]);
 
     const response = await request(app)
@@ -44,16 +44,21 @@ describe("Warehouse routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
+    expect(listSpy).toHaveBeenCalledTimes(1);
   });
 
   it("retrieves a warehouse by id", async () => {
-    mockedWarehouseService.getWarehouse.mockResolvedValue({
+    const getSpy = jest
+      .spyOn(WarehouseService.prototype, "getWarehouse")
+      .mockResolvedValue(
+        Warehouse.fromDatabase({
       id: 2,
       name: "Entrepôt Lyon",
       location: "Lyon",
       created_at: undefined,
       updated_at: undefined,
-    });
+        }),
+      );
 
     const response = await request(app)
       .get("/warehouses/2")
@@ -61,11 +66,11 @@ describe("Warehouse routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.name).toBe("Entrepôt Lyon");
-    expect(mockedWarehouseService.getWarehouse).toHaveBeenCalledWith(2);
+    expect(getSpy).toHaveBeenCalledWith(2);
   });
 
   it("returns 404 when warehouse is missing", async () => {
-    mockedWarehouseService.getWarehouse.mockRejectedValue(
+    jest.spyOn(WarehouseService.prototype, "getWarehouse").mockRejectedValue(
       new AppError("Entrepôt introuvable", 404),
     );
 
@@ -78,23 +83,28 @@ describe("Warehouse routes", () => {
   });
 
   it("validates warehouse creation payload", async () => {
+    const createSpy = jest.spyOn(WarehouseService.prototype, "createWarehouse");
     const response = await request(app)
       .post("/warehouses")
       .set("Authorization", authHeader())
       .send({ name: "" });
 
     expect(response.status).toBe(400);
-    expect(mockedWarehouseService.createWarehouse).not.toHaveBeenCalled();
+    expect(createSpy).not.toHaveBeenCalled();
   });
 
   it("creates a warehouse", async () => {
-    mockedWarehouseService.createWarehouse.mockResolvedValue({
+    const createSpy = jest
+      .spyOn(WarehouseService.prototype, "createWarehouse")
+      .mockResolvedValue(
+        Warehouse.fromDatabase({
       id: 3,
       name: "Entrepôt Marseille",
       location: "Marseille",
       created_at: undefined,
       updated_at: undefined,
-    });
+        }),
+      );
 
     const response = await request(app)
       .post("/warehouses")
@@ -103,20 +113,24 @@ describe("Warehouse routes", () => {
 
     expect(response.status).toBe(201);
     expect(response.body.location).toBe("Marseille");
-    expect(mockedWarehouseService.createWarehouse).toHaveBeenCalledWith({
+    expect(createSpy).toHaveBeenCalledWith({
       name: "Entrepôt Marseille",
       location: "Marseille",
     });
   });
 
   it("updates a warehouse", async () => {
-    mockedWarehouseService.updateWarehouse.mockResolvedValue({
+    const updateSpy = jest
+      .spyOn(WarehouseService.prototype, "updateWarehouse")
+      .mockResolvedValue(
+        Warehouse.fromDatabase({
       id: 4,
       name: "Entrepôt Lille",
       location: "Lille",
       created_at: undefined,
       updated_at: undefined,
-    });
+        }),
+      );
 
     const response = await request(app)
       .put("/warehouses/4")
@@ -125,11 +139,11 @@ describe("Warehouse routes", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.name).toBe("Entrepôt Lille");
-    expect(mockedWarehouseService.updateWarehouse).toHaveBeenCalledWith(4, { name: "Entrepôt Lille" });
+    expect(updateSpy).toHaveBeenCalledWith(4, { name: "Entrepôt Lille" });
   });
 
   it("propagates update errors", async () => {
-    mockedWarehouseService.updateWarehouse.mockRejectedValue(
+    jest.spyOn(WarehouseService.prototype, "updateWarehouse").mockRejectedValue(
       new AppError("Entrepôt introuvable", 404),
     );
 
@@ -143,18 +157,22 @@ describe("Warehouse routes", () => {
   });
 
   it("deletes a warehouse", async () => {
-    mockedWarehouseService.deleteWarehouse.mockResolvedValue();
+    const deleteSpy = jest
+      .spyOn(WarehouseService.prototype, "deleteWarehouse")
+      .mockResolvedValue();
 
     const response = await request(app)
       .delete("/warehouses/5")
       .set("Authorization", authHeader());
 
     expect(response.status).toBe(204);
-    expect(mockedWarehouseService.deleteWarehouse).toHaveBeenCalledWith(5);
+    expect(deleteSpy).toHaveBeenCalledWith(5);
   });
 
   it("propagates deletion errors", async () => {
-    mockedWarehouseService.deleteWarehouse.mockRejectedValue(
+    jest
+      .spyOn(WarehouseService.prototype, "deleteWarehouse")
+      .mockRejectedValue(
       new AppError("Entrepôt introuvable", 404),
     );
 

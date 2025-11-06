@@ -1,10 +1,5 @@
 import { AppError } from "../src/middlewares/errorHandler";
-import {
-  listProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-} from "../src/services/productService";
+import { ProductService } from "../src/services/productService";
 
 jest.mock("../src/config/postgres", () => ({
   postgresPool: {
@@ -15,10 +10,12 @@ jest.mock("../src/config/postgres", () => ({
 import { postgresPool } from "../src/config/postgres";
 
 const queryMock = postgresPool.query as jest.Mock;
+let service: ProductService;
 
 describe("productService", () => {
   beforeEach(() => {
     queryMock.mockReset();
+    service = new ProductService(postgresPool as unknown as any);
   });
 
   it("fetches products ordered by id", async () => {
@@ -34,7 +31,7 @@ describe("productService", () => {
       ],
     });
 
-    const products = await listProducts();
+    const products = await service.listProducts();
 
     expect(products).toHaveLength(1);
     expect(queryMock).toHaveBeenCalledWith(
@@ -55,7 +52,7 @@ describe("productService", () => {
       ],
     });
 
-    const product = await createProduct({
+    const product = await service.createProduct({
       name: "Palette",
       reference: "SKU-002",
       quantity: 5,
@@ -83,7 +80,7 @@ describe("productService", () => {
       ],
     });
 
-    const updated = await updateProduct(3, { quantity: 9 });
+    const updated = await service.updateProduct(3, { quantity: 9 });
 
     expect(updated.quantity).toBe(9);
     expect(queryMock).toHaveBeenCalledWith(
@@ -106,7 +103,7 @@ describe("productService", () => {
       ],
     });
 
-    const product = await updateProduct(5, {});
+    const product = await service.updateProduct(5, {});
 
     expect(product.id).toBe(5);
     expect(queryMock).toHaveBeenCalledWith(
@@ -121,7 +118,7 @@ describe("productService", () => {
       rows: [],
     });
 
-    await expect(updateProduct(999, {})).rejects.toThrow(AppError);
+    await expect(service.updateProduct(999, {})).rejects.toThrow(AppError);
   });
 
   it("throws when update does not affect any product", async () => {
@@ -130,7 +127,9 @@ describe("productService", () => {
       rows: [],
     });
 
-    await expect(updateProduct(6, { name: "Updated Box" })).rejects.toThrow(AppError);
+    await expect(
+      service.updateProduct(6, { name: "Updated Box" }),
+    ).rejects.toThrow(AppError);
   });
 
   it("deletes an existing product", async () => {
@@ -138,7 +137,7 @@ describe("productService", () => {
       rowCount: 1,
     });
 
-    await deleteProduct(4);
+    await service.deleteProduct(4);
 
     expect(queryMock).toHaveBeenCalledWith(
       "DELETE FROM products WHERE id = $1",
@@ -151,6 +150,6 @@ describe("productService", () => {
       rowCount: 0,
     });
 
-    await expect(deleteProduct(999)).rejects.toThrow(AppError);
-  });
+    await expect(service.deleteProduct(999)).rejects.toThrow(AppError);
+});
 });

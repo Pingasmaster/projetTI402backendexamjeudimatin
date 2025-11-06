@@ -1,12 +1,18 @@
 import { Request, Response } from "express";
-import { listMovements, createMovement } from "../services/movementService";
+import { MovementCreateProps } from "../models/movement";
+import { MovementService } from "../services/movementService";
 
-export const getMovements = async (_req: Request, res: Response) => {
-  const movements = await listMovements();
-  res.json(movements);
-};
+export class MovementController {
+  constructor(private readonly service: MovementService) {}
 
-export const postMovement = async (req: Request, res: Response) => {
-  const movement = await createMovement(req.body);
-  res.status(201).json(movement);
-};
+  public readonly getMovements = async (_req: Request, res: Response) => {
+    const movements = await this.service.listMovements();
+    res.json(movements.map((movement) => movement.toJSON()));
+  };
+
+  public readonly postMovement = async (req: Request, res: Response) => {
+    const payload = req.body as MovementCreateProps;
+    const movement = await this.service.createMovement(payload);
+    res.status(201).json(movement.toJSON());
+  };
+}
