@@ -29,10 +29,10 @@ npm install
 
 | Commande | Description |
 |----------|-------------|
-| `npm run dev` | Démarre l'API en mode développement (ts-node). |
-| `npm run build` | Compile le projet TypeScript dans `dist/`. |
-| `npm start` | Lance la version compilée (`dist/server.js`). |
-| `npm run openapi:build` | Génère `openapi.json` à partir de la configuration Swagger. |
+| `npm run dev` | Démarre l'API en mode développement via `ts-node`. |
+| `npm run build` | Compile le projet TypeScript dans `dist/` (les sources se retrouvent sous `dist/src`). |
+| `npm start` | Lance la version compilée (`node dist/src/server.js`). |
+| `npm run openapi:build` | Génère `openapi.json` à partir de la configuration Swagger (nécessite `npm run build` si vous lancez la version compilée). |
 
 ## Structure du projet
 
