@@ -34,7 +34,7 @@ npm install
 | `npm run test` | Voir la section Tests |
 | `npm run dev` | Démarre l'API en mode développement via `ts-node`. |
 | `npm start` | Lance la version compilée (`node dist/src/server.js`). |
-| `npm run openapi:build` | Génère `openapi.json` à partir de la configuration Swagger (nécessite `npm run build` si vous lancez la version compilée). |
+| `npm run doc` | Génère `openapi.json` à partir de la configuration Swagger (nécessite `npm run build` si vous lancez la version compilée). |
 
 ## Tests
 
@@ -43,7 +43,7 @@ npm install
 Pour repartir d’un environnement propre et vérifier le projet de bout en bout :
 
 ```bash
-rm -rf dist/ node_modules/ && npm install && npm run build && npm run test && npm run openapi:build && npm run start
+rm -rf dist/ node_modules/ && npm install && npm run build && npm run test && npm run doc && npm run start
 ```
 
 Ensuite on peut naviguer vers http://localhost:`PORT`/docs pour voir la documentation swagger et tester l'api manuellement.
@@ -94,7 +94,7 @@ stocklink-core/
 Générez la doc avec :
 
 ```bash
-npm run openapi:build
+npm run doc
 ```
 
 ## Endpoints principaux
