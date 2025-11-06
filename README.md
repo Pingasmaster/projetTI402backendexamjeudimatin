@@ -103,4 +103,4 @@ npm run openapi:build
 | GET | `/movements` | Historique des mouvements de stock. |
 | POST | `/movements` | Enregistrer un mouvement (met à jour le stock). |
 
-Toutes ces routes (hors `/auth/login` & `/healthz`) nécessitent un token Bearer valide.
+Toutes ces routes (hors `/auth/login` & `/health`) nécessitent un token Bearer valide.

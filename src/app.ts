@@ -36,7 +36,7 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
-app.get("/healthz", (_req, res) => {
+app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 

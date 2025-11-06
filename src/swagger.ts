@@ -189,7 +189,7 @@ const swaggerOptions: Options = {
       },
     },
     paths: {
-      "/healthz": {
+      "/health": {
         get: {
           tags: ["System"],
           summary: "Vérifier l'état de l'API",
