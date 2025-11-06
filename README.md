@@ -1,12 +1,11 @@
-# StockLink Core API
+# Projet backend stocklink api
 
-Plateforme API pour la gestion des entrepôts StockLink Core. Ce projet adopte une architecture MVC avec TypeScript, expose une documentation OpenAPI/Swagger, et se connecte à PostgreSQL (données opérationnelles) ainsi qu'à MongoDB (cartographie interne).
+Ce projet adopte une architecture MVC avec TypeScript comme demandé, expose une documentation OpenAPI/Swagger comme vu en cours, et se connecte à PostgreSQL (données opérationnelles) ainsi qu'à MongoDB (cartographie interne).
 
 ## Sommaire
 
 - [Prérequis](#prérequis)
 - [Installation](#installation)
-- [Configuration](#configuration)
 - [Scripts disponibles](#scripts-disponibles)
 - [Structure du projet](#structure-du-projet)
 - [Base de données](#base-de-données)
@@ -16,21 +15,15 @@ Plateforme API pour la gestion des entrepôts StockLink Core. Ce projet adopte u
 
 ## Prérequis
 
-- Node.js 18+
-- npm 9+
-- PostgreSQL 14+
-- MongoDB 6+
+- Node.js, npm, PostgreSQL, MongoDB installés
+- Les serveurs PostgreSQL et MongoDB sont lancés en arrière plan
+- Copiez .env.example à .env, faites en sorte que l'utilisateur et le mot de passe Postgresql soit bon. Créer l'utilisateur stocklink si besoin.
 
 ## Installation
 
 ```bash
 npm install
 ```
-
-## Configuration
-
-1. Dupliquez `.env.example` en `.env` puis adaptez les valeurs (ports, identifiants BD, secret JWT, etc.).
-2. Assurez-vous que les bases PostgreSQL et MongoDB sont accessibles avec ces paramètres.
 
 ## Scripts disponibles
 
@@ -72,14 +65,14 @@ stocklink-core/
 - **PostgreSQL** : tables `warehouses`, `products`, `movements` (scripts SQL dans `db/migrations/001_init.sql`).
 - **MongoDB** : collection `locations` décrivant la disposition interne des entrepôts.
 
-Exécutez les migrations SQL via votre outil habituel (psql, migrateur, etc.). La collection MongoDB est créée dynamiquement.
+Exécutez les migrations SQL via votre outil habituel. La collection MongoDB est créée dynamiquement.
 
 ## Sécurité
 
 - Authentification JWT (route `POST /auth/login`) via identifiants définis dans `.env`.
 - Middleware `authenticate` protège toutes les routes métier.
-- `helmet`, `cors`, `express-rate-limit` pour renforcer la sécurité HTTP.
-- Validation des entrées avec Zod et gestion centralisée des erreurs.
+- `helmet`, `cors`, `express-rate-limit` pour renforcer la sécurité HTTPS (devrait être en prod, ici est http car pas de certificat web évidemment car pas de domaine).
+- Validation des entrées avec Zod et gestion centralisée des erreurs (touche personelle que j'aime bien)
 
 ## Documentation API
 
@@ -87,7 +80,7 @@ Exécutez les migrations SQL via votre outil habituel (psql, migrateur, etc.). L
 - ReDoc (lecture seule) : http://localhost:`PORT`/redoc
 - Spec JSON : http://localhost:`PORT`/openapi.json
 
-Générez/rafraîchissez la spec avec :
+Générez la doc avec :
 
 ```bash
 npm run openapi:build
