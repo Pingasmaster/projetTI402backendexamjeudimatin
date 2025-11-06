@@ -1,4 +1,4 @@
-// Ce fichier s'assure que seules les personnes habilitées touchent aux actions critiques.
+// auth admin
 import { Response, NextFunction } from "express";
 import { AuthenticatedRequest } from "./authMiddleware";
 
@@ -7,6 +7,7 @@ export const isAdmin = (
   res: Response,
   next: NextFunction,
 ) => {
+  // Vérifie que l'utilisateur courant dispose du rôle administrateur.
   if (!req.user || req.user.role !== "admin") {
     return res.status(403).json({
       message: "Accès interdit",

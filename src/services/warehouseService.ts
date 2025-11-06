@@ -1,3 +1,4 @@
+// service pour les entrepôts
 import { Pool } from "pg";
 import { postgresPool } from "../config/postgres";
 import {
@@ -8,9 +9,11 @@ import {
 } from "../models/warehouse";
 import { AppError } from "../middlewares/errorHandler";
 
+// centralise les opérations métiers relatives aux entrepôts
 export class WarehouseService {
   constructor(private readonly db: Pool = postgresPool) {}
 
+  // retourne tous les entrepôts triés par identifiant
   async listWarehouses(): Promise<Warehouse[]> {
     const result = await this.db.query<WarehouseProps>(
       "SELECT * FROM warehouses ORDER BY id ASC",
@@ -18,6 +21,7 @@ export class WarehouseService {
     return result.rows.map(Warehouse.fromDatabase);
   }
 
+  // charge un entrepôt par son identifiant ou déclenche une erreur si absent
   async getWarehouse(id: number): Promise<Warehouse> {
     const result = await this.db.query<WarehouseProps>(
       "SELECT * FROM warehouses WHERE id = $1",
@@ -31,6 +35,7 @@ export class WarehouseService {
     return Warehouse.fromDatabase(result.rows[0]);
   }
 
+  // crée un nouvel entrepôt et retourne sa représentation de domaine
   async createWarehouse(
     warehouse: WarehouseCreateProps,
   ): Promise<Warehouse> {
@@ -44,6 +49,7 @@ export class WarehouseService {
     return Warehouse.fromDatabase(result.rows[0]);
   }
 
+  // mets à jour un entrepôt
   async updateWarehouse(
     id: number,
     updates: WarehouseUpdateProps,
@@ -79,6 +85,7 @@ export class WarehouseService {
     return Warehouse.fromDatabase(result.rows[0]);
   }
 
+  // supprime un entrepôt
   async deleteWarehouse(id: number): Promise<void> {
     const result = await this.db.query("DELETE FROM warehouses WHERE id = $1", [
       id,

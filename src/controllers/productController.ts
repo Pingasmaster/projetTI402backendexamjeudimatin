@@ -1,4 +1,4 @@
-// Ce fichier coordonne les échanges autour des produits avec sobriété.
+// coordonne les échanges autour des produits
 import { Request, Response } from "express";
 import {
   ProductCreateProps,
@@ -9,11 +9,13 @@ import { ProductService } from "../services/productService";
 export class ProductController {
   constructor(private readonly service: ProductService) {}
 
+  // liste les produits et renvoie leur représentation sérialisée
   public readonly getProducts = async (_req: Request, res: Response) => {
     const products = await this.service.listProducts();
     res.json(products.map((product) => product.toJSON()));
   };
 
+  // crée un produit
   public readonly postProduct = async (req: Request, res: Response) => {
     const { name, reference, quantity, warehouse_id } = req.body as ProductCreateProps;
     const product = await this.service.createProduct({
@@ -25,6 +27,7 @@ export class ProductController {
     res.status(201).json(product.toJSON());
   };
 
+  // mets à jour les attributs d'un produit existant
   public readonly putProduct = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const updates = req.body as ProductUpdateProps;
@@ -32,6 +35,7 @@ export class ProductController {
     res.json(updated.toJSON());
   };
 
+  // supprime un produit de l'inventaire
   public readonly removeProduct = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     await this.service.deleteProduct(id);

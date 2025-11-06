@@ -1,4 +1,4 @@
-// Ce fichier gère l'inscription et la connexion sans détour superflu.
+// gère l'inscription et la connexion
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 import { signToken } from "../utils/jwt";
@@ -16,6 +16,7 @@ export class AuthController {
     private readonly tokenSigner: TokenSigner = signToken,
   ) {}
 
+  // inscrit un nouvel utilisateur
   public readonly register = async (req: Request, res: Response) => {
     const { username, password, role } = req.body as UserRegistrationInput;
 
@@ -39,6 +40,7 @@ export class AuthController {
     res.status(201).json(created.toJSON());
   };
 
+  // authentifie l'utilisateur et fournit un jeton JWT
   public readonly login = async (req: Request, res: Response) => {
     const { username, password } = req.body as {
       username: string;

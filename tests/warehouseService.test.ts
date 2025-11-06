@@ -1,4 +1,3 @@
-// Ce fichier contrôle le service entrepôt dans les moindres détails.
 import { AppError } from "../src/middlewares/errorHandler";
 import { WarehouseService } from "../src/services/warehouseService";
 

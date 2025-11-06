@@ -1,4 +1,4 @@
-// Ce fichier centralise les erreurs pour offrir des retours lisibles.
+// centralise la gestion des erreurs
 import { NextFunction, Request, Response } from "express";
 
 export class AppError extends Error {
@@ -7,12 +7,12 @@ export class AppError extends Error {
 
   constructor(message: string, statusCode = 500, details?: string) {
     super(message);
+    // retient les infos nécessaires pour formater la réponse HTTP
     this.statusCode = statusCode;
     this.details = details;
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const errorHandler = (
   err: unknown,
   _req: Request,
@@ -20,12 +20,14 @@ export const errorHandler = (
   _next: NextFunction,
 ) => {
   if (err instanceof AppError) {
+    // applique la bonne structure d'erreur
     return res.status(err.statusCode).json({
       message: err.message,
       details: err.details,
     });
   }
 
+  // trace les erreurs inattendues pour faciliter le diagnostic
   console.error("Unexpected error:", err);
 
   return res.status(500).json({

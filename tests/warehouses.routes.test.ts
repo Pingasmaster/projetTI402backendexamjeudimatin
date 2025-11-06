@@ -1,4 +1,3 @@
-// Ce fichier teste les routes entrepôt telles qu'attendues par StockLink Pro.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";

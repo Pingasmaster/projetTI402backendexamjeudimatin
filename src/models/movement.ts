@@ -1,6 +1,7 @@
-// Ce fichier donne forme aux mouvements de stock.
+// modèle pour les mouvements de stock
 export type MovementType = "IN" | "OUT";
 
+// représentation stockée d'un mouvement individuel
 export interface MovementProps {
   id: number;
   type: MovementType;
@@ -9,12 +10,14 @@ export interface MovementProps {
   created_at: Date;
 }
 
+// données nécessaires pour créer un mouvement côté application
 export interface MovementCreateProps {
   type: MovementType;
   quantity: number;
   product_id: number;
 }
 
+// encapsule la logique métier d'un mouvement de stock
 export class Movement {
   constructor(private readonly props: MovementProps) {}
 
@@ -42,10 +45,12 @@ export class Movement {
     return this.props.created_at;
   }
 
+  // permets de savoir si le mouvement ajoute du stock
   isInbound(): boolean {
     return this.props.type === "IN";
   }
 
+  // exporte les données du mouvement vers un format brut
   toJSON(): MovementProps {
     return { ...this.props };
   }

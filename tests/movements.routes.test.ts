@@ -1,4 +1,3 @@
-// Ce fichier s'assure que les routes de mouvement tiennent leurs promesses.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";

@@ -1,4 +1,4 @@
-// Ce fichier met en musique les middlewares et routes pour proposer l'expérience StockLink Pro.
+// point d'entrée express pour les middlewares et routes de l'API
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
@@ -19,19 +19,23 @@ import {
 
 const app = express();
 
+// middlewares de sécurité HTTP (CSP désactivée hors prod pour simplifier le dev)
 app.use(
   helmet({
     contentSecurityPolicy: env.nodeEnv === "production" ? undefined : false,
   }),
 );
+// autorise le front local à accéder à l'API
 app.use(
   cors({
     origin: "http://localhost:3000",
     methods: ["GET", "POST", "PUT", "DELETE"],
   }),
 );
+// parse les payloads JSON et limite la taille pour éviter les abus
 app.use(express.json({ limit: "1mb" }));
 
+// Limiteur de débit global pour atténuer les attaques par force brute
 const limiter = rateLimit({
   windowMs: env.rateLimitWindowMs,
   max: env.rateLimitMax,
@@ -41,10 +45,12 @@ const limiter = rateLimit({
 
 app.use(limiter);
 
+// endpoint simple de monitoring utilisé par les sondes
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+// routes métiers regroupées par domaine fonctionnel
 app.use("/auth", authRoutes);
 app.use("/products", productRoutes);
 app.use("/movements", movementRoutes);
@@ -52,12 +58,15 @@ app.use("/warehouses/:id/locations", warehouseLocationRouter);
 app.use("/locations", locationLookupRouter);
 app.use("/warehouses", warehouseRoutes);
 
+// expose la documentation Swagger UI
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+// fournit le fichier OpenAPI brut
 app.get("/openapi.json", (_req, res) => {
   res.json(swaggerSpec);
 });
 
+// sert une version ReDoc pour la doc swagger
 app.get("/redoc", (_req, res) => {
   res.type("html").send(`<!DOCTYPE html>
 <html lang="fr">
@@ -83,6 +92,7 @@ app.get("/redoc", (_req, res) => {
 </html>`);
 });
 
+// gestion des routes inconnues et centralisation des erreurs
 app.use(notFoundHandler);
 app.use(errorHandler);
 

@@ -1,9 +1,12 @@
-// Ce fichier structure les emplacements logistiques dans le code.
+// structure les emplacements logistiques dans le code
+
+// données brutes sur les contenus de la localisation
 export interface LocationLevelProps {
   level: number;
   bins: string[];
 }
 
+// représentation d'une localuisation et encapsule la logique de duplication/lecture
 export class LocationLevel {
   constructor(private readonly props: LocationLevelProps) {}
 
@@ -22,6 +25,7 @@ export class LocationLevel {
     return [...this.props.bins];
   }
 
+  // indique si le niveau contient un bac identifié par son code
   containsBin(binCode: string): boolean {
     return this.props.bins.includes(binCode);
   }
@@ -38,11 +42,13 @@ export class LocationLevel {
   }
 }
 
+// normalise le rack et ses niveaux
 export interface LocationRackProps {
   rack: string;
   levels: LocationLevelProps[];
 }
 
+// rassemble la logique métier d'un rack et des niveaux
 export class LocationRack {
   constructor(
     private readonly rackId: string,
@@ -64,6 +70,7 @@ export class LocationRack {
     return this.levelEntities.map((level) => level.clone());
   }
 
+  // cherche la présence d'un bac dans les niveaux du rack
   containsBin(binCode: string): boolean {
     return this.levelEntities.some((level) => level.containsBin(binCode));
   }
@@ -80,11 +87,13 @@ export class LocationRack {
   }
 }
 
+// structure de données sérialisable pour une allée
 export interface LocationAisleProps {
   aisle: string;
   racks: LocationRackProps[];
 }
 
+// gestion métier d'une allée et des racks associés
 export class LocationAisle {
   constructor(
     private readonly aisleId: string,
@@ -106,6 +115,7 @@ export class LocationAisle {
     return this.rackEntities.map((rack) => rack.clone());
   }
 
+  // recherche un bac dans l'ensemble des racks de l'allée
   containsBin(binCode: string): boolean {
     return this.rackEntities.some((rack) => rack.containsBin(binCode));
   }
@@ -122,6 +132,7 @@ export class LocationAisle {
   }
 }
 
+// schéma complet d'un emplacement d'entrepôt
 export interface WarehouseLocationProps {
   warehouse_id: number;
   code: string;
@@ -136,6 +147,7 @@ export type WarehouseLocationCreateProps = Omit<
 
 export type WarehouseLocationUpdateProps = Partial<WarehouseLocationCreateProps>;
 
+// objet métier principal décrivant un emplacement d'entrepôt et sa structure
 export class WarehouseLocation {
   private readonly aisles: LocationAisle[];
   private readonly metadataValue?: Record<string, unknown>;
@@ -179,6 +191,7 @@ export class WarehouseLocation {
     return this.codeValue;
   }
 
+  // retourne une copie de la structure d'allées/racks/niveaux
   get layout(): LocationAisle[] {
     return this.aisles.map((aisle) => aisle.clone());
   }
@@ -187,6 +200,7 @@ export class WarehouseLocation {
     return this.metadataValue ? { ...this.metadataValue } : undefined;
   }
 
+  // construit une nouvelle instance avec les mises à jour fournies sans muter l'objet
   withUpdates(
     updates: WarehouseLocationUpdateProps,
   ): WarehouseLocation {
@@ -212,6 +226,7 @@ export class WarehouseLocation {
     return this.aisles.some((aisle) => aisle.containsBin(binCode));
   }
 
+  // sérialise l'objet sous une forme exploitable par la couche de persistance
   toJSON(): WarehouseLocationProps {
     return {
       warehouse_id: this.warehouseIdValue,

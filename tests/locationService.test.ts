@@ -1,4 +1,3 @@
-// Ce fichier sécurise les règles de cartographie via des tests.
 import { AppError } from "../src/middlewares/errorHandler";
 import { LocationService } from "../src/services/locationService";
 

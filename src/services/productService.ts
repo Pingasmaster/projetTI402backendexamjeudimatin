@@ -1,4 +1,5 @@
-// Ce fichier orchestre les opérations produit pour que le stock reste cohérent.
+// service des OPs produit
+
 import { Pool } from "pg";
 import { postgresPool } from "../config/postgres";
 import {
@@ -9,9 +10,11 @@ import {
 } from "../models/product";
 import { AppError } from "../middlewares/errorHandler";
 
+// encapsule les opérations CRUD sur les produits et centralise les vérifications d'existence
 export class ProductService {
   constructor(private readonly db: Pool = postgresPool) {}
 
+  // retourne la liste des produits classés par identifiant croissant
   async listProducts(): Promise<Product[]> {
     const result = await this.db.query<ProductProps>(
       "SELECT * FROM products ORDER BY id ASC",
@@ -19,6 +22,7 @@ export class ProductService {
     return result.rows.map(Product.fromDatabase);
   }
 
+  // insère un nouveau produit et renvoie sa représentation de domaine
   async createProduct(product: ProductCreateProps): Promise<Product> {
     const result = await this.db.query<ProductProps>(
       `INSERT INTO products (name, reference, quantity, warehouse_id)
@@ -30,6 +34,7 @@ export class ProductService {
     return Product.fromDatabase(result.rows[0]);
   }
 
+  // mets à jour un produit existant en ne modifiant que les champs fournis
   async updateProduct(
     id: number,
     updates: ProductUpdateProps,
@@ -71,6 +76,7 @@ export class ProductService {
     return Product.fromDatabase(result.rows[0]);
   }
 
+  // supprime un produit si celui-ci existe
   async deleteProduct(id: number): Promise<void> {
     const result = await this.db.query(
       "DELETE FROM products WHERE id = $1",

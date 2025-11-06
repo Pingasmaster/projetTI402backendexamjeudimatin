@@ -1,4 +1,3 @@
-// Ce fichier protège la logique produit avec des assertions précises.
 import { AppError } from "../src/middlewares/errorHandler";
 import { ProductService } from "../src/services/productService";
 

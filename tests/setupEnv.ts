@@ -1,4 +1,4 @@
-// Ce fichier prépare l'environnement de tests pour des exécutions tranquilles.
+// prépare l'environnement de tests pour exécuter tranquille, évites certain crashes lors de tests sans d'abord copier le .env.example en .env
 process.env.PORT = process.env.PORT ?? "4000";
 process.env.NODE_ENV = "test";
 process.env.POSTGRES_HOST = process.env.POSTGRES_HOST ?? "localhost";

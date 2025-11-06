@@ -1,4 +1,4 @@
-// Ce fichier authentifie les requêtes et transmet les rôles avec soin.
+// authentifie les requêtes et transmet les rôles
 import { Request, Response, NextFunction } from "express";
 import { UserRole } from "../models/user";
 import { verifyToken } from "../utils/jwt";
@@ -18,6 +18,7 @@ export const authenticate = (
 ) => {
   const authHeader = req.headers.authorization;
 
+  // vérifie que l'appelant fournit bien un token JWT au format attendu
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res.status(401).json({
       message: "Non autorisé",
@@ -29,6 +30,7 @@ export const authenticate = (
 
   try {
     const decoded = verifyToken(token);
+    // mémorise l'identité extraite du token pour les middlewares suivants
     req.user = {
       id: Number(decoded.sub),
       username: decoded.username,
@@ -36,6 +38,7 @@ export const authenticate = (
     };
     next();
   } catch (error) {
+    // rejette explicitement tout token invalide ou expiré
     return res.status(401).json({
       message: "Non autorisé",
       details: "Token invalide ou expiré",

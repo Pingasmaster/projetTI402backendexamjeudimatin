@@ -1,3 +1,4 @@
+// Ce fichier documente l'API pour que l'équipe sache où aller.
 import swaggerJSDoc, { Options } from "swagger-jsdoc";
 
 const layoutSchema = {

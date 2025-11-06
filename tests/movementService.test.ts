@@ -1,4 +1,3 @@
-// Ce fichier vérifie la logique métier autour des mouvements.
 import { AppError } from "../src/middlewares/errorHandler";
 import { MovementService } from "../src/services/movementService";
 

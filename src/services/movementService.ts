@@ -1,3 +1,4 @@
+// service de mouvement de stock
 import { Pool } from "pg";
 import { postgresPool } from "../config/postgres";
 import {
@@ -7,9 +8,11 @@ import {
 } from "../models/movement";
 import { AppError } from "../middlewares/errorHandler";
 
+// service qui applique la logique métier liée aux mouvements de stock, conserve aussi la cohérence des quantités produit
 export class MovementService {
   constructor(private readonly db: Pool = postgresPool) {}
 
+  // liste tous les mouvements de stock triés par ordre chronologique inverse
   async listMovements(): Promise<Movement[]> {
     const result = await this.db.query<MovementProps>(
       "SELECT * FROM movements ORDER BY created_at DESC",
@@ -17,6 +20,7 @@ export class MovementService {
     return result.rows.map(Movement.fromDatabase);
   }
 
+  // crée un nouveau mouvement en verrouillant le produit associé et en recalculant sa quantité atomiquement
   async createMovement(input: MovementCreateProps): Promise<Movement> {
     const client = await this.db.connect();
 
@@ -58,6 +62,7 @@ export class MovementService {
     }
   }
 
+  // calcule la nouvelle quantité de produit selon le type de mouvement et valide qu'un mouvement sortant ne rende pas le stock négatif
   private calculateNewQuantity(
     currentQuantity: number,
     input: MovementCreateProps,

@@ -1,4 +1,4 @@
-// Ce fichier charge la configuration d'environnement pour sécuriser notre lancement d'API.
+// charge la configuration d'environnement pour sécuriser l'API.
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -14,12 +14,14 @@ const requiredEnvVars = [
   "JWT_SECRET",
 ];
 
+// vérifie que chaque variable critique est disponible
 requiredEnvVars.forEach((key) => {
   if (!process.env[key]) {
     throw new Error(`Missing required environment variable: ${key}`);
   }
 });
 
+// formate toutes les valeurs de config, utile pour npm test
 export const env = {
   port: Number(process.env.PORT) || 3000,
   nodeEnv: process.env.NODE_ENV ?? "development",

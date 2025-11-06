@@ -1,4 +1,3 @@
-// Ce fichier vérifie les routes produits du point de vue d'un client.
 import request from "supertest";
 import app from "../src/app";
 import { signToken } from "../src/utils/jwt";

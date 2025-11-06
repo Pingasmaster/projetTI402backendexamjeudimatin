@@ -1,4 +1,4 @@
-// Ce fichier prépare la connexion PostgreSQL sans compromis sur la stabilité.
+// prépare la connexion PostgreSQL
 import { Pool } from "pg";
 import { env } from "./env";
 
@@ -11,6 +11,7 @@ export const postgresPool = new Pool({
   max: 10,
 });
 
+// détecte les incidents du pool
 postgresPool.on("error", (error) => {
   console.error("Unexpected PostgreSQL error", error);
 });

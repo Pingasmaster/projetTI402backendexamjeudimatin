@@ -1,4 +1,3 @@
-// Ce fichier assure que l'authentification répond à toutes les attentes.
 import request from "supertest";
 import bcrypt from "bcrypt";
 import app from "../src/app";

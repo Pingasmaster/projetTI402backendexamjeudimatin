@@ -1,4 +1,6 @@
-// Ce fichier formalise le modèle produit utilisé côté serveur.
+// modèle produit utilisé côté serveur
+
+// représentation complète d'un produit
 export interface ProductProps {
   id: number;
   name: string;
@@ -9,10 +11,13 @@ export interface ProductProps {
   updated_at?: Date;
 }
 
+// données attendues pour créer un produit dans le système
 export type ProductCreateProps = Omit<ProductProps, "id" | "created_at" | "updated_at">;
 
+// ensemble de champs modifiables d'un produit existant
 export type ProductUpdateProps = Partial<ProductCreateProps>;
 
+// modèle métier pour un produit dans l'inventaire
 export class Product {
   constructor(private readonly props: ProductProps) {}
 
@@ -48,6 +53,7 @@ export class Product {
     return this.props.updated_at;
   }
 
+  // produit une nouvelle instance avec les modifications souhaitées
   withUpdates(updates: ProductUpdateProps): Product {
     return new Product({
       ...this.props,
@@ -56,6 +62,7 @@ export class Product {
     });
   }
 
+  // donne l'état brut du produit
   toJSON(): ProductProps {
     return { ...this.props };
   }

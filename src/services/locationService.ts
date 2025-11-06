@@ -1,3 +1,4 @@
+// service cartographie des entrepôts
 import { Collection, Db } from "mongodb";
 import { getMongoDb } from "../config/mongo";
 import {
@@ -12,9 +13,11 @@ const collectionName = "locations";
 
 type DbFactory = () => Promise<Db>;
 
+// service responsable de la configuration et de la validation des emplacements des entrepôt persistants dans MongoDB
 export class LocationService {
   constructor(private readonly dbFactory: DbFactory = getMongoDb) {}
 
+  // obtient la collection MongoDB avec les configurations d'emplacements
   private async getCollection(): Promise<
     Collection<WarehouseLocationProps>
   > {
@@ -22,6 +25,7 @@ export class LocationService {
     return db.collection<WarehouseLocationProps>(collectionName);
   }
 
+  // retourne la configuration d'emplacement pour l'entrepôt
   async getWarehouseLocation(
     warehouseId: number,
   ): Promise<WarehouseLocation | null> {
@@ -30,6 +34,7 @@ export class LocationService {
     return record ? WarehouseLocation.fromDatabase(record) : null;
   }
 
+  // crée la configuration d'un entrepôt si elle n'existe pas déjà
   async createWarehouseLocation(
     warehouseId: number,
     location: WarehouseLocationCreateProps,
@@ -48,6 +53,7 @@ export class LocationService {
     return payload;
   }
 
+  // mets à jour la configuration d'emplacement d'un entrepôt existant
   async updateWarehouseLocation(
     warehouseId: number,
     updates: WarehouseLocationUpdateProps,
@@ -73,6 +79,7 @@ export class LocationService {
     return WarehouseLocation.fromDatabase(updatedRecord);
   }
 
+  // vérifie si un bin existe dans l'ensemble des racks
   async binExists(binCode: string): Promise<boolean> {
     const collection = await this.getCollection();
     const result = await collection.findOne({
